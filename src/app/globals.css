@@ -1,26 +1,118 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+  
+  --color-gold-50: #fbf8eb;
+  --color-gold-100: #f5edcb;
+  --color-gold-200: #ebd898;
+  --color-gold-300: #debfa7;
+  --color-gold-400: #d4af37; /* Primary Brand Accent */
+  --color-gold-500: #b9932a;
+  --color-gold-600: #997420;
+  --color-gold-700: #785719;
+  --color-gold-800: #573e13;
+  --color-gold-900: #3c2a0d;
+  
+  --color-luxury-black: #050505;
+  --color-luxury-charcoal: #111111;
+  --color-luxury-panel: #161616;
+  --color-luxury-border: #1f1b12;
+  --color-luxury-gold: #d4af37;
+  --color-luxury-text: #f5f5f0;
+  --color-luxury-muted: #8e8e88;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f1b12;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Custom Luxury Gradients and Classes */
+.gold-gradient {
+  background: linear-gradient(135deg, #f5edcb 0%, #d4af37 50%, #997420 100%);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.gold-text-gradient {
+  background: linear-gradient(135deg, #f5edcb 0%, #d4af37 50%, #997420 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.luxury-card {
+  background-color: #111111;
+  border: 1px solid #1f1b12;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.luxury-card:hover {
+  border-color: rgba(212, 175, 55, 0.4);
+  box-shadow: 0 4px 20px -5px rgba(212, 175, 55, 0.15);
+}
+
+.luxury-input {
+  background-color: #161616;
+  border: 1px solid #1f1b12;
+  color: #f5f5f0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.luxury-input:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.3);
+}
+
+.luxury-btn-primary {
+  background: linear-gradient(135deg, #ebd898 0%, #d4af37 100%);
+  color: #050505;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 10px 20px;
+  transition: all 0.2s ease-in-out;
+  border: none;
+  cursor: pointer;
+}
+
+.luxury-btn-primary:hover {
+  opacity: 0.95;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  transform: translateY(-1px);
+}
+
+.luxury-btn-secondary {
+  background: transparent;
+  color: #f5f5f0;
+  border: 1px solid #1f1b12;
+  border-radius: 6px;
+  padding: 10px 20px;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.luxury-btn-secondary:hover {
+  border-color: #d4af37;
+  color: #d4af37;
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.glass-panel {
+  background: rgba(17, 17, 17, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.08);
 }

@@ -1,0 +1,114 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
+
+export async function GET(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get('search') || '';
+
+    const userId = (session.user as any).id;
+
+    const clients = await prisma.client.findMany({
+      where: {
+        userId,
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+          { phone: { contains: search, mode: 'insensitive' } },
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        orders: {
+          select: {
+            id: true,
+            orderNumber: true,
+            status: true,
+            totalAmount: true,
+            dueDate: true,
+          },
+        },
+        communications: {
+          take: 5,
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    return NextResponse.json(clients);
+  } catch (err: any) {
+    console.error('Clients GET error:', err);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = (session.user as any).id;
+    const body = await req.json();
+
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      address,
+      notes,
+      measurements,
+      portalPassword,
+    } = body;
+
+    if (!firstName || !lastName) {
+      return NextResponse.json({ error: 'First name and last name are required' }, { status: 400 });
+    }
+
+    const emailKey = email?.toLowerCase().trim() || null;
+
+    if (emailKey) {
+      const existingClient = await prisma.client.findUnique({
+        where: { email: emailKey },
+      });
+      if (existingClient) {
+        return NextResponse.json({ error: 'A client with this email already exists' }, { status: 400 });
+      }
+    }
+
+    let hashedPortalPassword = null;
+    if (portalPassword) {
+      hashedPortalPassword = await bcrypt.hash(portalPassword, 10);
+    }
+
+    const newClient = await prisma.client.create({
+      data: {
+        firstName,
+        lastName,
+        email: emailKey,
+        phone,
+        address,
+        notes,
+        measurements: measurements || {},
+        portalPassword: hashedPortalPassword,
+        userId,
+      },
+    });
+
+    return NextResponse.json(newClient);
+  } catch (err: any) {
+    console.error('Client POST error:', err);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
