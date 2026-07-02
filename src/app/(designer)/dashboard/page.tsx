@@ -6,7 +6,7 @@ import {
   Scissors,
   Users,
   Layers,
-  DollarSign,
+  Banknote,
   Calendar as CalendarIcon,
   Plus,
   Clock,
@@ -16,6 +16,7 @@ import {
   X
 } from 'lucide-react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 interface Order {
   id: string;
@@ -102,9 +103,10 @@ export default function DashboardPage() {
       }
       setIsClientModalOpen(false);
       setClientForm({ firstName: '', lastName: '', email: '', phone: '', address: '', notes: '', portalPassword: '' });
+      toast.success('Client created successfully!');
       fetchData();
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -122,9 +124,10 @@ export default function DashboardPage() {
       }
       setIsOrderModalOpen(false);
       setOrderForm({ clientId: '', totalAmount: '', depositPaid: '', dueDate: '', notes: '', garments: [{ name: '', description: '', fabricType: '', color: '' }] });
+      toast.success('Order initialized successfully!');
       fetchData();
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -142,9 +145,10 @@ export default function DashboardPage() {
       }
       setIsTaskModalOpen(false);
       setTaskForm({ title: '', description: '', priority: 'MEDIUM', orderId: '', dueDate: '' });
+      toast.success('Task created successfully!');
       fetchData();
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -230,14 +234,14 @@ export default function DashboardPage() {
           <div>
             <p className="text-[10px] uppercase tracking-widest text-[#8e8e88] font-semibold">Revenue This Month</p>
             <h3 className="text-3xl font-serif font-bold text-[#f5f5f0] mt-1">
-              ${metrics.revenueThisMonth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              ₦{metrics.revenueThisMonth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
             <span className="text-[9px] text-[#8e8e88] uppercase tracking-wider font-semibold mt-1 block">
-              Deposits: ${metrics.depositsThisMonth.toLocaleString()}
+              Deposits: ₦{metrics.depositsThisMonth.toLocaleString()}
             </span>
           </div>
           <div className="w-12 h-12 bg-[#161616] border border-[#1f1b12] rounded-lg flex items-center justify-center text-[#d4af37]">
-            <DollarSign className="w-5 h-5" />
+            <Banknote className="w-5 h-5" />
           </div>
         </div>
 
@@ -282,7 +286,7 @@ export default function DashboardPage() {
                 <div key={idx} className="flex flex-col items-center flex-1 group">
                   {/* Tooltip */}
                   <span className="absolute bottom-24 opacity-0 group-hover:opacity-100 bg-[#161616] border border-[#d4af37]/30 text-[#d4af37] text-[10px] px-2 py-1 rounded transition-opacity shadow-md pointer-events-none">
-                    ${month.revenue.toLocaleString()}
+                    ₦{month.revenue.toLocaleString()}
                   </span>
                   {/* Bar */}
                   <div
@@ -491,11 +495,11 @@ export default function DashboardPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Total Cost ($)</label>
+                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Total Cost (₦)</label>
                   <input type="number" required value={orderForm.totalAmount} onChange={(e) => setOrderForm({ ...orderForm, totalAmount: e.target.value })} className="w-full luxury-input" />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Deposit Paid ($)</label>
+                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Deposit Paid (₦)</label>
                   <input type="number" value={orderForm.depositPaid} onChange={(e) => setOrderForm({ ...orderForm, depositPaid: e.target.value })} className="w-full luxury-input" />
                 </div>
               </div>

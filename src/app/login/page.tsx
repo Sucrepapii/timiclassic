@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Scissors, Crown, AlertCircle, Sparkles } from 'lucide-react';
+import { Scissors, Crown, AlertCircle, Sparkles, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 function LoginForm() {
   const router = useRouter();
@@ -15,6 +15,7 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Auto-detect portal intent from URL query params
   useEffect(() => {
@@ -69,7 +70,7 @@ function LoginForm() {
           TIMICLASSIC
         </h1>
         <p className="text-xs tracking-[0.3em] uppercase text-[#d4af37] mt-1.5 flex items-center gap-1 font-medium">
-          <Sparkles className="w-3 h-3 text-[#d4af37]" /> DesignerOS
+          <Sparkles className="w-3 h-3 text-[#d4af37]" /> Fashion Designer
         </p>
       </div>
 
@@ -135,14 +136,23 @@ function LoginForm() {
               Password
             </label>
           </div>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full luxury-input text-sm"
-            placeholder="••••••••"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full luxury-input text-sm pr-10"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#8e8e88] hover:text-[#d4af37] transition-colors"
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
 
         <button
@@ -161,12 +171,17 @@ function LoginForm() {
             <span className="text-[#d4af37] font-medium">Contact Timiclassic support</span>
           </p>
         ) : (
-          <p>
-            Need to register a designer account?{' '}
-            <Link href="/register" className="text-[#d4af37] hover:underline font-medium">
-              Register here
-            </Link>
-          </p>
+          <>
+            {/* 
+            <p>
+              Need to register a designer account?{' '}
+              <Link href="/register" className="text-[#d4af37] hover:underline font-medium">
+                Register here
+              </Link>
+            </p> 
+            */}
+            
+          </>
         )}
       </div>
     </div>
@@ -179,6 +194,11 @@ export default function LoginPage() {
       {/* Background Decorative Circles */}
       <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#d4af37]/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[#d4af37]/5 blur-[120px] pointer-events-none" />
+
+      {/* Back to Home Button */}
+      <Link href="/" className="absolute top-8 left-8 flex items-center gap-2 text-xs uppercase tracking-widest text-[#8e8e88] hover:text-[#d4af37] transition-colors z-10 font-semibold">
+        <ArrowLeft className="w-4 h-4" /> Back to Home
+      </Link>
 
       <Suspense fallback={
         <div className="w-full max-w-md bg-[#111111]/85 border border-[#1f1b12] rounded-xl p-8 backdrop-blur-md flex flex-col items-center justify-center gap-3">

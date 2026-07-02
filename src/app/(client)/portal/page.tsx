@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Crown,
   Scissors,
-  DollarSign,
+  Banknote,
   Calendar,
   MessageSquare,
   Camera,
@@ -14,10 +14,12 @@ import {
   CheckCircle,
   AlertCircle,
   FileText,
-  Clock
+  Clock,
+  Bell
 } from 'lucide-react';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/components/billing/InvoicePDF';
+import toast from 'react-hot-toast';
 
 interface Garment {
   id: string;
@@ -41,6 +43,14 @@ interface Order {
   garments: Garment[];
 }
 
+interface Communication {
+  id: string;
+  type: string;
+  direction: string;
+  content: string;
+  createdAt: string;
+}
+
 interface Profile {
   id: string;
   firstName: string;
@@ -50,6 +60,7 @@ interface Profile {
   notes: string | null;
   measurements: any;
   orders: Order[];
+  communications: Communication[];
 }
 
 const TIMELINE_STEPS = [
@@ -123,10 +134,10 @@ export default function ClientPortalPage() {
 
       if (res.ok) {
         setComment('');
-        alert('Your message was successfully sent to the designer at Timiclassic!');
+        toast.success('Your message was successfully sent to the designer at Timiclassic!');
         fetchProfile();
       } else {
-        alert('Failed to send message.');
+        toast.error('Failed to send message.');
       }
     } catch (err) {
       console.error(err);
@@ -170,13 +181,13 @@ export default function ClientPortalPage() {
         });
 
         if (updateRes.ok) {
-          alert('Photo uploaded and sent to designer!');
+          toast.success('Photo uploaded and sent to designer!');
           fetchProfile();
         } else {
-          alert('Failed to link photo to profile');
+          toast.error('Failed to link photo to profile');
         }
       } else {
-        alert('Upload failed');
+        toast.error('Upload failed');
       }
     } catch (err) {
       console.error(err);
@@ -319,6 +330,31 @@ export default function ClientPortalPage() {
             </div>
           )}
 
+          {/* Designer Updates / Notifications */}
+          <div className="luxury-card p-6 space-y-4">
+            <h3 className="text-xs uppercase tracking-widest font-bold text-[#d4af37] border-b border-[#1f1b12]/50 pb-2 flex items-center gap-1.5">
+              <Bell className="w-4 h-4" /> Updates & Notifications
+            </h3>
+            
+            {profile.communications.filter((c) => c.direction === 'OUTBOUND').length === 0 ? (
+              <p className="text-xs text-[#8e8e88] italic py-2">No new updates from your designer.</p>
+            ) : (
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                {profile.communications
+                  .filter((c) => c.direction === 'OUTBOUND')
+                  .map((msg) => (
+                    <div key={msg.id} className="bg-[#111] p-3 rounded-lg border border-[#1f1b12] text-xs">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="font-semibold text-[#f5f5f0] uppercase tracking-wider text-[10px]">TimiClassic Studio</span>
+                        <span className="text-[#8e8e88] text-[9px] font-mono">{new Date(msg.createdAt).toLocaleString()}</span>
+                      </div>
+                      <p className="text-[#8e8e88] leading-relaxed">{msg.content}</p>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+
           {/* Feedback message box */}
           <div className="luxury-card p-6 space-y-4">
             <h3 className="text-xs uppercase tracking-widest font-bold text-[#f5f5f0] border-b border-[#1f1b12]/50 pb-2">
@@ -362,6 +398,7 @@ export default function ClientPortalPage() {
                   <span>Last update: {profile.measurements.sets[0].date}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-xs">
+
                   <div className="bg-[#161616] p-3 border border-[#1f1b12] rounded">
                     <span className="text-[9px] uppercase tracking-widest text-[#8e8e88] font-semibold">Chest</span>
                     <p className="font-semibold text-sm font-mono text-[#f5f5f0] mt-0.5">{profile.measurements.sets[0].chest || 'N/A'}"</p>

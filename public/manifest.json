@@ -1,6 +1,6 @@
 {
-  "name": "Timiclassic DesignerOS",
-  "short_name": "DesignerOS",
+  "name": "Timiclassic Fashion Designer",
+  "short_name": "Fashion Designer",
   "description": "Bespoke fashion command center & custom clothing pipeline for Timiclassic",
   "start_url": "/dashboard",
   "display": "standalone",

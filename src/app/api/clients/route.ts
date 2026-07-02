@@ -87,9 +87,15 @@ export async function POST(req: Request) {
       }
     }
 
+    let rawTempPassword = null;
     let hashedPortalPassword = null;
+
     if (portalPassword) {
       hashedPortalPassword = await bcrypt.hash(portalPassword, 10);
+    } else {
+      // Auto-generate a secure 8-character temporary password
+      rawTempPassword = Math.random().toString(36).slice(-8);
+      hashedPortalPassword = await bcrypt.hash(rawTempPassword, 10);
     }
 
     const newClient = await prisma.client.create({
@@ -102,11 +108,16 @@ export async function POST(req: Request) {
         notes,
         measurements: measurements || {},
         portalPassword: hashedPortalPassword,
+        needsPasswordChange: true, // Force password change on next login
         userId,
       },
     });
 
-    return NextResponse.json(newClient);
+    // Return the auto-generated password just this once so the admin can share it
+    return NextResponse.json({ 
+      ...newClient, 
+      tempPassword: rawTempPassword 
+    });
   } catch (err: any) {
     console.error('Client POST error:', err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

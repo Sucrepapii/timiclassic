@@ -50,6 +50,7 @@ export const authOptions: NextAuthOptions = {
             name: `${client.firstName} ${client.lastName}`,
             email: client.email,
             role: 'CLIENT',
+            needsPasswordChange: client.needsPasswordChange,
           };
         } else {
           // Designer / Staff authentication
@@ -71,6 +72,7 @@ export const authOptions: NextAuthOptions = {
             name: user.name,
             email: user.email,
             role: user.role,
+            needsPasswordChange: false,
           };
         }
       },
@@ -81,6 +83,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role || 'USER';
+        token.needsPasswordChange = (user as any).needsPasswordChange || false;
       }
       
       // Allow dynamic session updates (e.g. updating user image/name)
@@ -94,6 +97,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
+        (session.user as any).needsPasswordChange = token.needsPasswordChange;
       }
       return session;
     },

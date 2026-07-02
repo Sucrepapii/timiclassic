@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Scissors,
   Plus,
-  DollarSign,
+  Banknote,
   Calendar,
   Layers,
   ChevronRight,
@@ -201,9 +201,9 @@ export default function OrdersPage() {
                           {order.priority}
                         </span>
                       </td>
-                      <td className="p-4 text-right font-semibold">${order.totalAmount?.toLocaleString() || '0.00'}</td>
-                      <td className="p-4 text-right text-emerald-400 font-medium">${order.depositPaid?.toLocaleString() || '0.00'}</td>
-                      <td className="p-4 text-right text-amber-500 font-bold">${balance.toLocaleString() || '0.00'}</td>
+                      <td className="p-4 text-right font-semibold">₦{order.totalAmount?.toLocaleString() || '0.00'}</td>
+                      <td className="p-4 text-right text-emerald-400 font-medium">₦{order.depositPaid?.toLocaleString() || '0.00'}</td>
+                      <td className="p-4 text-right text-amber-500 font-bold">₦{balance.toLocaleString() || '0.00'}</td>
                       <td className="p-4 font-medium">
                         {order.dueDate ? new Date(order.dueDate).toLocaleDateString() : 'N/A'}
                       </td>

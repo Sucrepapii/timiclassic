@@ -63,6 +63,13 @@ export async function PUT(
       portalPassword,
     } = body;
 
+    const role = (session.user as any).role;
+    const userId = (session.user as any).id;
+    
+    if (role === 'CLIENT' && params.id !== userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const existingClient = await prisma.client.findUnique({
       where: { id: params.id },
     });

@@ -4,7 +4,7 @@ import React, { useState, useEffect, use } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   Scissors,
-  DollarSign,
+  Banknote,
   Calendar,
   Clock,
   Plus,
@@ -24,6 +24,7 @@ import Link from 'next/link';
 import { useTimerStore } from '@/store/useStore';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/components/billing/InvoicePDF';
+import toast from 'react-hot-toast';
 
 interface Garment {
   id: string;
@@ -128,6 +129,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         body: JSON.stringify({ taskId, completed: isCompleted }),
       });
       if (res.ok) {
+        if (isCompleted) toast.success('Task marked as completed!');
         fetchOrder();
       }
     } catch (err) {
@@ -147,7 +149,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ taskId, addTime: elapsedHours }),
           });
-          alert(`Logged ${elapsedHours} hours tracked!`);
+          toast.success(`Logged ${elapsedHours} hours tracked!`);
           fetchOrder();
         } catch (err) {
           console.error(err);
@@ -174,8 +176,9 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
       if (res.ok) {
         setIsFinModalOpen(false);
         fetchOrder();
+        toast.success('Payments updated successfully!');
       } else {
-        alert('Failed to log payment details');
+        toast.error('Failed to log payment details');
       }
     } catch (err) {
       console.error(err);
@@ -198,8 +201,9 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         setIsTaskModalOpen(false);
         setTaskForm({ title: '', description: '', priority: 'MEDIUM', dueDate: '', garmentId: '' });
         fetchOrder();
+        toast.success('Task created successfully!');
       } else {
-        alert('Failed to log task');
+        toast.error('Failed to log task');
       }
     } catch (err) {
       console.error(err);
@@ -258,7 +262,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             onClick={() => setIsFinModalOpen(true)}
             className="flex items-center gap-1 bg-[#161616] hover:bg-[#d4af37]/5 border border-[#1f1b12] text-[#d4af37] px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider cursor-pointer"
           >
-            <DollarSign className="w-4 h-4" /> Log Payments
+            <Banknote className="w-4 h-4" /> Log Payments
           </button>
           
           {/* Dynamic Invoice PDF Link */}
@@ -445,15 +449,15 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             <div className="space-y-4 text-xs">
               <div className="flex justify-between border-b border-[#1f1b12]/30 pb-2">
                 <span className="text-[#8e8e88] uppercase tracking-widest text-[9px] font-semibold">Total Price</span>
-                <span className="font-bold text-[#f5f5f0]">${(order.totalAmount || 0).toLocaleString()}</span>
+                <span className="font-bold text-[#f5f5f0]">₦{(order.totalAmount || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between border-b border-[#1f1b12]/30 pb-2">
                 <span className="text-[#8e8e88] uppercase tracking-widest text-[9px] font-semibold">Deposit Paid</span>
-                <span className="font-bold text-emerald-400">-${(order.depositPaid || 0).toLocaleString()}</span>
+                <span className="font-bold text-emerald-400">-₦{(order.depositPaid || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between border-b border-[#1f1b12]/30 pb-2">
                 <span className="text-[#8e8e88] uppercase tracking-widest text-[9px] font-semibold">Balance Due</span>
-                <span className="font-bold text-amber-500 font-mono text-sm">${(order.balanceDue || 0).toLocaleString()}</span>
+                <span className="font-bold text-amber-500 font-mono text-sm">₦{(order.balanceDue || 0).toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -470,7 +474,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             <h3 className="text-lg font-serif text-[#f5f5f0] mb-4 uppercase tracking-widest border-b border-[#1f1b12] pb-2">Record Payments</h3>
             <form onSubmit={handleUpdateFinance} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Total Garment Cost ($)</label>
+                <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Total Garment Cost (₦)</label>
                 <input
                   type="number"
                   required
@@ -480,7 +484,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                 />
               </div>
               <div>
-                <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Deposits Logged ($)</label>
+                <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Deposits Logged (₦)</label>
                 <input
                   type="number"
                   required

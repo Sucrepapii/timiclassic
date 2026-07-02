@@ -13,6 +13,7 @@ import {
   Inbox,
   AlertCircle
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface Client {
   id: string;
@@ -133,10 +134,11 @@ export default function CommunicationsHub() {
         const select = document.getElementById('template-select') as HTMLSelectElement;
         if (select) select.value = '';
         
+        toast.success('Message sent successfully!');
         fetchComms();
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to record communication log');
+        toast.error(err.error || 'Failed to record communication log');
       }
     } catch (err) {
       console.error(err);
@@ -217,9 +219,6 @@ export default function CommunicationsHub() {
                   className="w-full luxury-input"
                 >
                   <option value="EMAIL">Email</option>
-                  <option value="WHATSAPP">WhatsApp</option>
-                  <option value="SMS">SMS</option>
-                  <option value="PHONE">Phone Log</option>
                   <option value="NOTE">Internal Note</option>
                 </select>
               </div>

@@ -263,8 +263,7 @@ export function InvoicePDF({ order }: InvoicePDFProps) {
               </View>
               <View style={styles.priceCol}>
                 <Text style={styles.tableCell}>
-                  {/* For solo client invoice, distribute total amount or list as total */}
-                  ${idx === 0 ? (order.totalAmount || 0).toFixed(2) : '0.00'}
+                  ₦{idx === 0 ? (order.totalAmount || 0).toFixed(2) : '0.00'}
                 </Text>
               </View>
             </View>
@@ -275,19 +274,19 @@ export function InvoicePDF({ order }: InvoicePDFProps) {
         <View style={styles.summaryContainer}>
           <View style={styles.summaryBlock}>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Subtotal</Text>
-              <Text style={styles.summaryValue}>${(order.totalAmount || 0).toFixed(2)}</Text>
+              <Text style={styles.summaryLabel}>Total:</Text>
+              <Text style={styles.summaryValue}>₦{(order.totalAmount || 0).toFixed(2)}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Deposit Paid</Text>
-              <Text style={[styles.summaryValue, { color: '#2e7d32' }]}>
-                -${(order.depositPaid || 0).toFixed(2)}
+              <Text style={styles.summaryLabel}>Deposit Received:</Text>
+              <Text style={styles.summaryValue}>
+                -₦{(order.depositPaid || 0).toFixed(2)}
               </Text>
             </View>
-            <View style={[styles.summaryRow, styles.grandTotalRow]}>
-              <Text style={styles.grandTotalLabel}>Balance Due</Text>
-              <Text style={styles.grandTotalValue}>
-                ${(order.balanceDue || 0).toFixed(2)}
+            <View style={[styles.summaryRow, { marginTop: 8, borderTopWidth: 1, borderTopColor: '#e5e5e5', paddingTop: 8 }]}>
+              <Text style={[styles.summaryLabel, { fontFamily: 'Playfair', fontSize: 12, color: '#000' }]}>Balance Due:</Text>
+              <Text style={[styles.summaryValue, { fontFamily: 'Playfair', fontSize: 12, color: '#000' }]}>
+                ₦{(order.balanceDue || 0).toFixed(2)}
               </Text>
             </View>
           </View>

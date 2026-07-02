@@ -116,6 +116,20 @@ export async function PUT(
       });
     }
 
+    if (status && status !== existingOrder.status) {
+      // Notify client of status change
+      const niceStatus = status.replace('_', ' ');
+      await prisma.communication.create({
+        data: {
+          clientId: existingOrder.clientId,
+          orderId: existingOrder.id,
+          type: 'NOTE',
+          direction: 'OUTBOUND',
+          content: `Automated Update: Your order ${existingOrder.orderNumber} has progressed to the ${niceStatus} phase.`,
+        }
+      });
+    }
+
     const updatedOrder = await prisma.order.findUnique({
       where: { id: params.id },
       include: { garments: true },

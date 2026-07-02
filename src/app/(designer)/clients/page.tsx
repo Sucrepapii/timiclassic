@@ -14,10 +14,12 @@ import {
   Sparkles,
   Camera,
   Trash2,
-  Edit2,
   Calendar,
-  X
+  X,
+  Download,
+  Edit2
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface Client {
   id: string;
@@ -41,9 +43,25 @@ export default function ClientsPage() {
   const [loading, setLoading] = useState(true);
 
   // Modals / forms states
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isMeasureModalOpen, setIsMeasureModalOpen] = useState(false);
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
   
+  // Custom Confirmation Modal
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
+  
+  const [addForm, setAddForm] = useState({ firstName: '', lastName: '', email: '', phone: '', address: '', notes: '' });
   const [editForm, setEditForm] = useState({ firstName: '', lastName: '', email: '', phone: '', address: '', notes: '' });
   const [measureForm, setMeasureForm] = useState({ chest: '', waist: '', hips: '', shoulder: '', sleeve: '', custom: '' });
   const [uploading, setUploading] = useState(false);
@@ -88,6 +106,32 @@ export default function ClientsPage() {
     }
   }, [selectedClientId, clients]);
 
+  const handleAddSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(addForm),
+      });
+      if (res.ok) {
+        const newClient = await res.json();
+        setIsAddModalOpen(false);
+        setAddForm({ firstName: '', lastName: '', email: '', phone: '', address: '', notes: '' });
+        toast.success('Client profile created!');
+        fetchClients();
+        if (newClient.tempPassword) {
+          setTempPassword(newClient.tempPassword);
+        }
+      } else {
+        const err = await res.json();
+        toast.error(err.error || 'Failed to add client');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedClientId) return;
@@ -99,10 +143,11 @@ export default function ClientsPage() {
       });
       if (res.ok) {
         setIsEditModalOpen(false);
+        toast.success('Client profile updated!');
         fetchClients();
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to update client');
+        toast.error(err.error || 'Failed to update client');
       }
     } catch (err) {
       console.error(err);
@@ -137,9 +182,10 @@ export default function ClientsPage() {
       if (res.ok) {
         setIsMeasureModalOpen(false);
         setMeasureForm({ chest: '', waist: '', hips: '', shoulder: '', sleeve: '', custom: '' });
+        toast.success('Measurements recorded successfully!');
         fetchClients();
       } else {
-        alert('Failed to log measurements');
+        toast.error('Failed to log measurements');
       }
     } catch (err) {
       console.error(err);
@@ -148,17 +194,26 @@ export default function ClientsPage() {
 
   const handleDeleteClient = async () => {
     if (!selectedClientId) return;
-    if (!confirm('Are you sure you want to permanently delete this client and all associated orders?')) return;
-    try {
-      const res = await fetch(`/api/clients/${selectedClientId}`, { method: 'DELETE' });
-      if (res.ok) {
-        setSelectedClientId(null);
-        setSelectedClient(null);
-        fetchClients();
+    
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Delete Client',
+      message: 'Are you sure you want to permanently delete this client and all associated orders? This action cannot be undone.',
+      onConfirm: async () => {
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        try {
+          const res = await fetch(`/api/clients/${selectedClientId}`, { method: 'DELETE' });
+          if (res.ok) {
+            setSelectedClientId(null);
+            setSelectedClient(null);
+            toast.success('Client deleted successfully!');
+            fetchClients();
+          }
+        } catch (err) {
+          console.error(err);
+        }
       }
-    } catch (err) {
-      console.error(err);
-    }
+    });
   };
 
   // Upload sketch/photo
@@ -193,12 +248,13 @@ export default function ClientsPage() {
         });
 
         if (updateRes.ok) {
+          toast.success('Design sketch uploaded!');
           fetchClients();
         } else {
-          alert('Failed to link uploaded photo to client');
+          toast.error('Failed to link uploaded photo to client');
         }
       } else {
-        alert('Failed to upload file');
+        toast.error('Failed to upload file');
       }
     } catch (err) {
       console.error(err);
@@ -214,6 +270,12 @@ export default function ClientsPage() {
           <h1 className="text-3xl font-serif text-[#f5f5f0] tracking-wide">Client Directory</h1>
           <p className="text-xs text-[#8e8e88] uppercase tracking-widest mt-1">Manage measurements and client profiles</p>
         </div>
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="luxury-btn-primary flex items-center gap-2 text-xs uppercase tracking-widest font-semibold px-4 py-2.5"
+        >
+          <Plus className="w-4 h-4" /> New Client
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[500px]">
@@ -396,22 +458,36 @@ export default function ClientsPage() {
                     {selectedClient.measurements.photos.map((photoUrl: string, idx: number) => (
                       <div key={idx} className="relative aspect-square border border-[#1f1b12] rounded-lg overflow-hidden bg-[#161616] group">
                         <img src={photoUrl} alt="Garment Sketch" className="object-cover w-full h-full hover:scale-105 transition-all duration-300" />
-                        <button
-                          onClick={async () => {
-                            if (!confirm('Delete photo link?')) return;
-                            const updatedPhotos = selectedClient.measurements.photos.filter((url: string) => url !== photoUrl);
-                            const updatedMeasurements = { ...selectedClient.measurements, photos: updatedPhotos };
-                            await fetch(`/api/clients/${selectedClient.id}`, {
-                              method: 'PUT',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ ...editForm, measurements: updatedMeasurements }),
-                            });
-                            fetchClients();
-                          }}
-                          className="absolute top-2 right-2 p-1.5 bg-red-950/80 border border-red-800 text-red-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <a href={photoUrl} download target="_blank" rel="noopener noreferrer" className="p-1.5 bg-[#111]/80 border border-[#d4af37] text-[#d4af37] rounded-md cursor-pointer hover:bg-[#d4af37]/20" title="Download Sketch">
+                            <Download className="w-3.5 h-3.5" />
+                          </a>
+                          <button
+                            onClick={() => {
+                              setConfirmConfig({
+                                isOpen: true,
+                                title: 'Delete Photo',
+                                message: 'Are you sure you want to remove this design sketch?',
+                                onConfirm: async () => {
+                                  setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                                  const updatedPhotos = selectedClient.measurements.photos.filter((url: string) => url !== photoUrl);
+                                  const updatedMeasurements = { ...selectedClient.measurements, photos: updatedPhotos };
+                                  await fetch(`/api/clients/${selectedClient.id}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ ...editForm, measurements: updatedMeasurements }),
+                                  });
+                                  toast.success('Photo deleted');
+                                  fetchClients();
+                                }
+                              });
+                            }}
+                            className="p-1.5 bg-red-950/80 border border-red-800 text-red-200 rounded-md cursor-pointer hover:bg-red-900/80"
+                            title="Delete Sketch"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -542,6 +618,93 @@ export default function ClientsPage() {
               </div>
               <button type="submit" className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2">Log New Specs</button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* OVERLAY MODAL: ADD CLIENT PROFILE */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-[#050505]/85 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="w-full max-w-lg bg-[#111] border border-[#1f1b12] rounded-xl p-6 relative">
+            <button onClick={() => setIsAddModalOpen(false)} className="absolute top-4 right-4 text-[#8e8e88] hover:text-[#f5f5f0] cursor-pointer">
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="text-lg font-serif text-[#f5f5f0] mb-4 uppercase tracking-widest border-b border-[#1f1b12] pb-2">Add New Client</h3>
+            <form onSubmit={handleAddSubmit} className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">First Name</label>
+                  <input type="text" required value={addForm.firstName} onChange={(e) => setAddForm({ ...addForm, firstName: e.target.value })} className="w-full luxury-input" />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Last Name</label>
+                  <input type="text" required value={addForm.lastName} onChange={(e) => setAddForm({ ...addForm, lastName: e.target.value })} className="w-full luxury-input" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Email (For Login)</label>
+                  <input type="email" value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} className="w-full luxury-input" />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Phone</label>
+                  <input type="text" value={addForm.phone} onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })} className="w-full luxury-input" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Address</label>
+                <input type="text" value={addForm.address} onChange={(e) => setAddForm({ ...addForm, address: e.target.value })} className="w-full luxury-input" />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Notes</label>
+                <textarea rows={3} value={addForm.notes} onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })} className="w-full luxury-input resize-none" />
+              </div>
+              <button type="submit" className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2">Create Profile</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* OVERLAY MODAL: TEMP PASSWORD DISPLAY */}
+      {tempPassword && (
+        <div className="fixed inset-0 bg-[#050505]/85 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="w-full max-w-sm bg-[#111] border border-[#d4af37] shadow-[0_0_30px_rgba(212,175,55,0.15)] rounded-xl p-6 relative text-center">
+            <h3 className="text-lg font-serif text-[#d4af37] mb-2 uppercase tracking-widest">Client Created!</h3>
+            <p className="text-xs text-[#8e8e88] mb-4 leading-relaxed">
+              Please copy and share this temporary password securely with the client. They will be forced to change it on their first login.
+            </p>
+            <div className="bg-[#161616] border border-[#1f1b12] p-4 rounded-lg mb-6">
+              <p className="text-2xl font-mono text-[#f5f5f0] tracking-widest select-all">{tempPassword}</p>
+            </div>
+            <button onClick={() => setTempPassword(null)} className="w-full luxury-btn-primary uppercase tracking-widest py-3 font-semibold">
+              I've copied it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* OVERLAY MODAL: CONFIRMATION */}
+      {confirmConfig.isOpen && (
+        <div className="fixed inset-0 bg-[#050505]/85 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="w-full max-w-sm bg-[#111] border border-red-900/50 shadow-[0_0_30px_rgba(153,27,27,0.15)] rounded-xl p-6 relative text-center">
+            <h3 className="text-lg font-serif text-red-400 mb-2 uppercase tracking-widest">{confirmConfig.title}</h3>
+            <p className="text-xs text-[#8e8e88] mb-6 leading-relaxed">
+              {confirmConfig.message}
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))} 
+                className="flex-1 py-3 text-xs uppercase tracking-widest text-[#8e8e88] bg-[#161616] border border-[#1f1b12] rounded-md hover:text-[#f5f5f0] transition-colors font-semibold"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmConfig.onConfirm} 
+                className="flex-1 py-3 text-xs uppercase tracking-widest text-red-100 bg-red-950/80 border border-red-800 rounded-md hover:bg-red-900 transition-colors font-semibold"
+              >
+                Confirm
+              </button>
+            </div>
           </div>
         </div>
       )}

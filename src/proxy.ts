@@ -36,6 +36,12 @@ export async function proxy(req: NextRequest) {
     if (token.role !== 'CLIENT') {
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
+    
+    // Enforce temporary password change
+    if (token.needsPasswordChange && pathname !== '/portal/change-password') {
+      return NextResponse.redirect(new URL('/portal/change-password', req.url));
+    }
+    
     return NextResponse.next();
   }
 
@@ -57,6 +63,14 @@ export async function proxy(req: NextRequest) {
     }
     if (token.role === 'CLIENT') {
       if (pathname.startsWith('/api/')) {
+        if (
+          pathname.startsWith('/api/portal') ||
+          pathname.startsWith('/api/upload') ||
+          pathname.startsWith('/api/communications') ||
+          pathname.startsWith(`/api/clients/${token.id}`)
+        ) {
+          return NextResponse.next();
+        }
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
       }
       return NextResponse.redirect(new URL('/portal', req.url));

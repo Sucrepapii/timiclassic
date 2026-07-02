@@ -15,8 +15,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       } else if (window.location.protocol === 'https:' || window.location.hostname === 'localhost') {
         navigator.serviceWorker.register('/sw.js')
-          .then((reg) => console.log('DesignerOS ServiceWorker registered:', reg.scope))
-          .catch((err) => console.error('DesignerOS ServiceWorker failed:', err));
+          .then((reg) => console.log('Fashion Designer ServiceWorker registered:', reg.scope))
+          .catch((err) => console.error('Fashion Designer ServiceWorker failed:', err));
       }
     }
   }, []);

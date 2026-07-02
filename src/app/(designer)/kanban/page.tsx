@@ -12,6 +12,7 @@ import {
   Clock
 } from 'lucide-react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 interface Order {
   id: string;
@@ -43,6 +44,7 @@ export default function KanbanPage() {
   const [loading, setLoading] = useState(true);
   const [priorityFilter, setPriorityFilter] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [activeCol, setActiveCol] = useState(COLUMNS[0].id);
 
   const fetchOrders = async () => {
     try {
@@ -102,7 +104,7 @@ export default function KanbanPage() {
       // Revert on fail
       console.error(err);
       setOrders(previousOrders);
-      alert('Could not update status. Reverting state.');
+      toast.error('Could not update status. Reverting state.');
     }
   };
 
@@ -170,6 +172,22 @@ export default function KanbanPage() {
             </select>
           </div>
 
+          {/* Mobile column selector */}
+          <div className="flex lg:hidden items-center gap-2 bg-[#111] border border-[#1f1b12] px-3 py-2 rounded-lg text-xs">
+            <Layers className="w-4 h-4 text-[#d4af37]" />
+            <select
+              value={activeCol}
+              onChange={(e) => setActiveCol(e.target.value)}
+              className="bg-transparent border-none text-[#f5f5f0] focus:outline-none cursor-pointer"
+            >
+              {COLUMNS.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <button
             onClick={handleRefresh}
             className={`p-2.5 border border-[#1f1b12] bg-[#111] text-[#8e8e88] hover:text-[#d4af37] rounded-lg transition-all cursor-pointer ${
@@ -191,7 +209,9 @@ export default function KanbanPage() {
               key={col.id}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, col.id)}
-              className="w-72 bg-[#111] border border-[#1f1b12] rounded-xl flex flex-col shrink-0 overflow-hidden"
+              className={`w-full lg:w-72 bg-[#111] border border-[#1f1b12] rounded-xl flex-col shrink-0 overflow-hidden ${
+                col.id === activeCol ? 'flex' : 'hidden lg:flex'
+              }`}
             >
               {/* Column header */}
               <div className="p-4 border-b border-[#1f1b12]/50 bg-[#161616] flex items-center justify-between">
@@ -235,13 +255,43 @@ export default function KanbanPage() {
                           >
                             {order.orderNumber}
                           </Link>
-                          <span
-                            className={`px-1.5 py-0.5 rounded text-[8px] tracking-wider uppercase font-bold border ${getPriorityColor(
-                              order.priority
-                            )}`}
-                          >
-                            {order.priority}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <select
+                              className="lg:hidden text-[9px] bg-[#111] border border-[#1f1b12] text-[#8e8e88] rounded px-1 outline-none py-0.5 cursor-pointer max-w-[80px]"
+                              value={order.status}
+                              onChange={async (e) => {
+                                const newStatus = e.target.value;
+                                const previousOrders = [...orders];
+                                setOrders((prev) =>
+                                  prev.map((o) => (o.id === order.id ? { ...o, status: newStatus } : o))
+                                );
+                                try {
+                                  const res = await fetch(`/api/orders/${order.id}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ status: newStatus }),
+                                  });
+                                  if (!res.ok) throw new Error('Update failed');
+                                } catch (err) {
+                                  setOrders(previousOrders);
+                                  toast.error('Could not update status.');
+                                }
+                              }}
+                            >
+                              {COLUMNS.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                  {c.name}
+                                </option>
+                              ))}
+                            </select>
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[8px] tracking-wider uppercase font-bold border ${getPriorityColor(
+                                order.priority
+                              )}`}
+                            >
+                              {order.priority}
+                            </span>
+                          </div>
                         </div>
 
                         {/* Client details */}

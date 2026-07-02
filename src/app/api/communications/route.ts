@@ -71,11 +71,23 @@ export async function POST(req: Request) {
     }
 
     const userId = (session.user as any).id;
+    const role = (session.user as any).role;
 
-    // Verify client belongs to designer
-    const client = await prisma.client.findFirst({
-      where: { id: clientId, userId },
-    });
+    let client;
+    if (role === 'CLIENT') {
+      // Client is sending message to designer
+      if (clientId !== userId) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      client = await prisma.client.findUnique({
+        where: { id: clientId },
+      });
+    } else {
+      // Designer is sending message to client
+      client = await prisma.client.findFirst({
+        where: { id: clientId, userId },
+      });
+    }
 
     if (!client) {
       return NextResponse.json({ error: 'Client profile not found' }, { status: 404 });
@@ -103,7 +115,7 @@ export async function POST(req: Request) {
                 <h2 style="color: #000; border-bottom: 2px solid #d4af37; padding-bottom: 10px;">TIMICLASSIC</h2>
                 <p style="white-space: pre-wrap; font-size: 14px; line-height: 1.6;">${content}</p>
                 <hr style="border: 0; border-top: 1px solid #e5e5e5; margin-top: 30px;" />
-                <p style="font-size: 11px; color: #8e8e88; text-transform: uppercase; tracking-widest: 1px;">Timiclassic DesignerOS Command Center</p>
+                <p style="font-size: 11px; color: #8e8e88; text-transform: uppercase; tracking-widest: 1px;">Timiclassic Fashion Designer Command Center</p>
               </div>`,
             }),
           });

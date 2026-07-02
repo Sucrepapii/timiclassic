@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -14,13 +14,17 @@ import {
   Sparkles,
   Play,
   Square,
-  Clock
+  Clock,
+  Menu,
+  X
 } from 'lucide-react';
 import { useTimerStore } from '@/store/useStore';
+import toast from 'react-hot-toast';
 
 export default function DesignerLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Connect task timer
   const { isRunning, activeTaskTitle, elapsedSeconds, tick, stopTimer } = useTimerStore();
@@ -53,7 +57,7 @@ export default function DesignerLayout({ children }: { children: React.ReactNode
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ taskId, addTime: elapsedHours }),
         });
-        alert(`Logged ${elapsedHours} hours to task!`);
+        toast.success(`Logged ${elapsedHours} hours to task!`);
       } catch (err) {
         console.error('Failed to log time:', err);
       }
@@ -73,16 +77,42 @@ export default function DesignerLayout({ children }: { children: React.ReactNode
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-xs uppercase tracking-widest text-[#d4af37]">Loading DesignerOS...</p>
+          <p className="text-xs uppercase tracking-widest text-[#d4af37]">Loading Fashion Designer...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex bg-[#050505] text-[#f5f5f0]">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#050505] text-[#f5f5f0] overflow-hidden">
+      {/* Mobile Header */}
+      <div className="md:hidden flex items-center justify-between p-4 border-b border-[#1f1b12]/50 bg-[#111111] z-40">
+        <Link href="/dashboard" className="flex flex-col">
+          <h2 className="text-lg font-serif tracking-widest uppercase font-semibold text-[#f5f5f0]">
+            TIMICLASSIC
+          </h2>
+        </Link>
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 -mr-2 text-[#8e8e88] hover:text-[#d4af37] transition-colors cursor-pointer"
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </div>
+
+      {/* Overlay for mobile */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-[#111111] border-r border-[#1f1b12] flex flex-col justify-between shrink-0">
+      <aside className={`
+        fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#111111] border-r border-[#1f1b12] flex flex-col justify-between shrink-0 transition-transform duration-300 ease-in-out
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
         <div>
           {/* Header Branding */}
           <div className="p-6 border-b border-[#1f1b12]/50">
@@ -91,7 +121,7 @@ export default function DesignerLayout({ children }: { children: React.ReactNode
                 TIMICLASSIC
               </h2>
               <p className="text-[10px] tracking-[0.3em] uppercase text-[#d4af37] mt-1 flex items-center gap-1 font-semibold">
-                <Sparkles className="w-3 h-3" /> DesignerOS
+                <Sparkles className="w-3 h-3" /> Fashion Designer
               </p>
             </Link>
           </div>
@@ -105,6 +135,7 @@ export default function DesignerLayout({ children }: { children: React.ReactNode
                 <Link
                   key={link.href}
                   href={link.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-medium uppercase tracking-wider transition-all ${
                     isActive
                       ? 'bg-[#d4af37] text-[#050505] shadow-[0_0_12px_rgba(212,175,55,0.2)] font-semibold'
@@ -172,8 +203,8 @@ export default function DesignerLayout({ children }: { children: React.ReactNode
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-y-auto">
-        <main className="flex-1 p-8 md:p-10 max-w-7xl mx-auto w-full">
+      <div className="flex-1 flex flex-col h-[calc(100vh-73px)] md:h-screen overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full">
           {children}
         </main>
       </div>

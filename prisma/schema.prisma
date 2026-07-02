@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -31,6 +32,7 @@ model Client {
   notes          String?         @db.Text
   measurements   Json?           // Flexible JSON for measurement sets
   portalPassword String?         // Hashed password for client portal access
+  needsPasswordChange Boolean    @default(true) // Force password change on first login
   userId         String
   user           User            @relation(fields: [userId], references: [id])
   orders         Order[]
