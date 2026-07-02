@@ -59,12 +59,8 @@ function LoginForm() {
     <div className="w-full max-w-md bg-[#111111]/85 border border-[#1f1b12] rounded-xl p-8 backdrop-blur-md shadow-2xl relative">
       {/* Brand Banner */}
       <div className="flex flex-col items-center mb-8 text-center">
-        <div className="w-14 h-14 bg-gradient-to-tr from-[#111] to-[#1f1b12] border border-[#d4af37]/35 rounded-full flex items-center justify-center mb-3 shadow-[0_0_15px_rgba(212,175,55,0.1)]">
-          {isPortal ? (
-            <Crown className="w-6 h-6 text-[#d4af37]" />
-          ) : (
-            <Scissors className="w-6 h-6 text-[#d4af37]" />
-          )}
+        <div className="w-20 h-20 rounded-full flex items-center justify-center mb-3 shadow-[0_0_15px_rgba(212,175,55,0.2)] overflow-hidden">
+          <img src="/logo.jpg" alt="Timiclassic Logo" className="w-full h-full object-cover" />
         </div>
         <h1 className="text-3xl font-serif tracking-widest uppercase font-semibold text-[#f5f5f0]">
           TIMICLASSIC

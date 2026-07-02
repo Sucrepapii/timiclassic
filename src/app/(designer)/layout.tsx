@@ -87,7 +87,8 @@ export default function DesignerLayout({ children }: { children: React.ReactNode
     <div className="min-h-screen flex flex-col md:flex-row bg-[#050505] text-[#f5f5f0] overflow-hidden">
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-[#1f1b12]/50 bg-[#111111] z-40">
-        <Link href="/dashboard" className="flex flex-col">
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <img src="/logo.jpg" alt="Timiclassic Logo" className="w-8 h-8 rounded-full object-cover shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
           <h2 className="text-lg font-serif tracking-widest uppercase font-semibold text-[#f5f5f0]">
             TIMICLASSIC
           </h2>
@@ -116,13 +117,16 @@ export default function DesignerLayout({ children }: { children: React.ReactNode
         <div>
           {/* Header Branding */}
           <div className="p-6 border-b border-[#1f1b12]/50">
-            <Link href="/dashboard" className="group">
-              <h2 className="text-xl font-serif tracking-widest uppercase font-semibold text-[#f5f5f0] group-hover:text-[#d4af37] transition-all">
-                TIMICLASSIC
-              </h2>
-              <p className="text-[10px] tracking-[0.3em] uppercase text-[#d4af37] mt-1 flex items-center gap-1 font-semibold">
-                <Sparkles className="w-3 h-3" /> Fashion Designer
-              </p>
+            <Link href="/dashboard" className="group flex items-center gap-3">
+              <img src="/logo.jpg" alt="Timiclassic Logo" className="w-10 h-10 rounded-full object-cover shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
+              <div>
+                <h2 className="text-xl font-serif tracking-widest uppercase font-semibold text-[#f5f5f0] group-hover:text-[#d4af37] transition-all">
+                  TIMICLASSIC
+                </h2>
+                <p className="text-[10px] tracking-[0.3em] uppercase text-[#d4af37] mt-1 flex items-center gap-1 font-semibold">
+                  <Sparkles className="w-3 h-3" /> Studio
+                </p>
+              </div>
             </Link>
           </div>
 

@@ -23,8 +23,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     <div className="min-h-screen flex flex-col bg-[#050505] text-[#f5f5f0]">
       {/* Top Header Navbar */}
       <header className="bg-[#111] border-b border-[#1f1b12] px-6 py-4 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <Crown className="w-5 h-5 text-[#d4af37]" />
+        <div className="flex items-center gap-3">
+          <img src="/logo.jpg" alt="Timiclassic Logo" className="w-8 h-8 rounded-full object-cover shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
           <div>
             <h1 className="text-sm font-serif tracking-widest uppercase font-semibold text-[#f5f5f0]">
               TIMICLASSIC

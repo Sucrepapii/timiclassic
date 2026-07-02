@@ -5,7 +5,8 @@ import {
   Text,
   View,
   StyleSheet,
-  Font
+  Font,
+  Image
 } from '@react-pdf/renderer';
 
 // Define styling
@@ -204,9 +205,12 @@ export function InvoicePDF({ order }: InvoicePDFProps) {
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.businessName}>TIMICLASSIC</Text>
-            <Text style={styles.businessSubtitle}>Bespoke Fashion House</Text>
+          <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Image src="/logo.jpg" style={{ width: 45, height: 45, borderRadius: 22.5 }} />
+            <View>
+              <Text style={styles.businessName}>TIMICLASSIC</Text>
+              <Text style={styles.businessSubtitle}>Bespoke Fashion House</Text>
+            </View>
           </View>
           <View>
             <Text style={styles.invoiceTitle}>INVOICE</Text>
@@ -284,8 +288,8 @@ export function InvoicePDF({ order }: InvoicePDFProps) {
               </Text>
             </View>
             <View style={[styles.summaryRow, { marginTop: 8, borderTopWidth: 1, borderTopColor: '#e5e5e5', paddingTop: 8 }]}>
-              <Text style={[styles.summaryLabel, { fontFamily: 'Playfair', fontSize: 12, color: '#000' }]}>Balance Due:</Text>
-              <Text style={[styles.summaryValue, { fontFamily: 'Playfair', fontSize: 12, color: '#000' }]}>
+              <Text style={[styles.summaryLabel, { fontSize: 12, color: '#000' }]}>Balance Due:</Text>
+              <Text style={[styles.summaryValue, { fontSize: 12, color: '#000' }]}>
                 ₦{(order.balanceDue || 0).toFixed(2)}
               </Text>
             </View>
