@@ -1,12 +1,5 @@
 const cloudinary = require('cloudinary').v2;
 
-// 1. Configure Cloudinary using inline credentials
-cloudinary.config({
-  cloud_name: 'sraichxr', // ← replace this
-  api_key: '263158979286162', // ← replace this
-  api_secret: 'K5HdH4J21fIsoyxNgRSovfx3I-U', // ← replace this
-});
-
 async function run() {
   try {
     // 2. Upload an image from Cloudinary's demo domains
