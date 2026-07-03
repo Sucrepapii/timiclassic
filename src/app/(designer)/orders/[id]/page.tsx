@@ -76,6 +76,10 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Due date editing
+  const [isEditingDueDate, setIsEditingDueDate] = useState(false);
+  const [newDueDate, setNewDueDate] = useState('');
+
   // Financial logging
   const [isFinModalOpen, setIsFinModalOpen] = useState(false);
   const [finForm, setFinForm] = useState({ totalAmount: '', depositPaid: '' });
@@ -99,6 +103,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         totalAmount: (data.totalAmount || 0).toString(),
         depositPaid: (data.depositPaid || 0).toString(),
       });
+      setNewDueDate(data.dueDate ? new Date(data.dueDate).toISOString().split('T')[0] : '');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -158,6 +163,25 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
     } else {
       // Start timer
       startTimer(task.id, task.title);
+    }
+  };
+
+  const handleUpdateDueDate = async () => {
+    try {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dueDate: newDueDate ? new Date(newDueDate).toISOString() : null }),
+      });
+      if (res.ok) {
+        setIsEditingDueDate(false);
+        fetchOrder();
+        toast.success('Target delivery date updated!');
+      } else {
+        toast.error('Failed to update delivery date');
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -427,11 +451,35 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             </h4>
             <div className="space-y-4 text-xs">
               <div>
-                <span className="text-[9px] uppercase tracking-widest text-[#8e8e88] block">Target Delivery</span>
-                <p className="font-semibold text-[#f5f5f0] flex items-center gap-1.5 mt-1 font-mono">
-                  <Calendar className="w-4 h-4 text-[#d4af37]" />
-                  {order.dueDate ? new Date(order.dueDate).toLocaleDateString() : 'No deadline set'}
-                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] uppercase tracking-widest text-[#8e8e88] block">Target Delivery</span>
+                  {!isEditingDueDate && (
+                    <button onClick={() => setIsEditingDueDate(true)} className="text-[9px] text-[#d4af37] uppercase tracking-widest hover:underline cursor-pointer">
+                      Edit
+                    </button>
+                  )}
+                </div>
+                {isEditingDueDate ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <input 
+                      type="date" 
+                      value={newDueDate} 
+                      onChange={(e) => setNewDueDate(e.target.value)} 
+                      className="luxury-input text-xs w-full py-1.5" 
+                    />
+                    <button onClick={handleUpdateDueDate} className="bg-[#d4af37] text-[#050505] px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest hover:opacity-90 transition-opacity">
+                      Save
+                    </button>
+                    <button onClick={() => setIsEditingDueDate(false)} className="text-[#8e8e88] hover:text-[#f5f5f0] p-1">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <p className="font-semibold text-[#f5f5f0] flex items-center gap-1.5 mt-1 font-mono">
+                    <Calendar className="w-4 h-4 text-[#d4af37]" />
+                    {order.dueDate ? new Date(order.dueDate).toLocaleDateString() : 'No deadline set'}
+                  </p>
+                )}
               </div>
 
               <div>
