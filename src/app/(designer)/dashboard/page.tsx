@@ -59,6 +59,13 @@ export default function DashboardPage() {
   const [clientForm, setClientForm] = useState({ firstName: '', lastName: '', email: '', phone: '', address: '', notes: '', portalPassword: '' });
   const [orderForm, setOrderForm] = useState({ clientId: '', totalAmount: '', depositPaid: '', dueDate: '', notes: '', garments: [{ name: '', description: '', fabricType: '', color: '' }] });
   const [taskForm, setTaskForm] = useState({ title: '', description: '', priority: 'MEDIUM', orderId: '', dueDate: '' });
+  const [staffForm, setStaffForm] = useState({ name: '', email: '', password: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
+  const [staffList, setStaffList] = useState<any[]>([]);
+
+  const isAdmin = (session?.user as any)?.role === 'ADMIN';
+  const isStaff = (session?.user as any)?.role === 'STAFF';
 
   const fetchData = async () => {
     try {
@@ -91,6 +98,7 @@ export default function DashboardPage() {
   // Quick Action Handlers
   const handleCreateClient = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const res = await fetch('/api/clients', {
         method: 'POST',
@@ -107,11 +115,55 @@ export default function DashboardPage() {
       fetchData();
     } catch (err: any) {
       toast.error(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  const handleCreateStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/staff', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(staffForm),
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to create staff account');
+      }
+      toast.success('Staff account created! They will be forced to change password on login.');
+      setStaffForm({ name: '', email: '', password: '' });
+      fetchStaffList();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const fetchStaffList = async () => {
+    try {
+      const res = await fetch('/api/staff');
+      if (res.ok) {
+        const data = await res.json();
+        setStaffList(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin && isStaffModalOpen) {
+      fetchStaffList();
+    }
+  }, [isAdmin, isStaffModalOpen]);
+
   const handleCreateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -128,11 +180,14 @@ export default function DashboardPage() {
       fetchData();
     } catch (err: any) {
       toast.error(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const res = await fetch('/api/tasks', {
         method: 'POST',
@@ -149,6 +204,8 @@ export default function DashboardPage() {
       fetchData();
     } catch (err: any) {
       toast.error(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -202,18 +259,30 @@ export default function DashboardPage() {
           >
             <Plus className="w-4 h-4" /> New Client
           </button>
-          <button
-            onClick={() => setIsOrderModalOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase border border-[#d4af37] text-[#d4af37] px-4 py-2.5 rounded-lg hover:bg-[#d4af37]/5 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" /> New Order
-          </button>
-          <button
-            onClick={() => setIsTaskModalOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase bg-[#d4af37] text-[#050505] px-4 py-2.5 rounded-lg hover:opacity-95 hover:shadow-[0_0_12px_rgba(212,175,55,0.3)] transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4 text-black" /> Add Task
-          </button>
+          {!isStaff && (
+            <>
+              <button
+                onClick={() => setIsOrderModalOpen(true)}
+                className="flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase border border-[#d4af37] text-[#d4af37] px-4 py-2.5 rounded-lg hover:bg-[#d4af37]/5 transition-all cursor-pointer"
+              >
+                <Plus className="w-4 h-4" /> New Order
+              </button>
+              <button
+                onClick={() => setIsTaskModalOpen(true)}
+                className="flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase bg-[#d4af37] text-[#050505] px-4 py-2.5 rounded-lg hover:opacity-95 hover:shadow-[0_0_12px_rgba(212,175,55,0.3)] transition-all cursor-pointer"
+              >
+                <Plus className="w-4 h-4 text-black" /> Add Task
+              </button>
+            </>
+          )}
+          {isAdmin && (
+            <button
+              onClick={() => setIsStaffModalOpen(true)}
+              className="flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase border border-[#d4af37] text-[#d4af37] px-4 py-2.5 rounded-lg hover:bg-[#d4af37]/5 transition-all cursor-pointer"
+            >
+              <Users className="w-4 h-4" /> Manage Team
+            </button>
+          )}
         </div>
       </div>
 
@@ -230,20 +299,22 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="luxury-card p-6 flex items-center justify-between">
-          <div>
-            <p className="text-[10px] uppercase tracking-widest text-[#8e8e88] font-semibold">Revenue This Month</p>
-            <h3 className="text-3xl font-serif font-bold text-[#f5f5f0] mt-1">
-              ₦{metrics.revenueThisMonth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </h3>
-            <span className="text-[9px] text-[#8e8e88] uppercase tracking-wider font-semibold mt-1 block">
-              Deposits: ₦{metrics.depositsThisMonth.toLocaleString()}
-            </span>
+        {!isStaff && (
+          <div className="luxury-card p-6 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-[#8e8e88] font-semibold">Revenue This Month</p>
+              <h3 className="text-3xl font-serif font-bold text-[#f5f5f0] mt-1">
+                ₦{metrics.revenueThisMonth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </h3>
+              <span className="text-[9px] text-[#8e8e88] uppercase tracking-wider font-semibold mt-1 block">
+                Deposits: ₦{metrics.depositsThisMonth.toLocaleString()}
+              </span>
+            </div>
+            <div className="w-12 h-12 bg-[#161616] border border-[#1f1b12] rounded-lg flex items-center justify-center text-[#d4af37]">
+              <Banknote className="w-5 h-5" />
+            </div>
           </div>
-          <div className="w-12 h-12 bg-[#161616] border border-[#1f1b12] rounded-lg flex items-center justify-center text-[#d4af37]">
-            <Banknote className="w-5 h-5" />
-          </div>
-        </div>
+        )}
 
         <div className="luxury-card p-6 flex items-center justify-between">
           <div>
@@ -269,9 +340,10 @@ export default function DashboardPage() {
       </div>
 
       {/* Analytics Trends Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Revenue SVG Chart */}
-        <div className="luxury-card p-6 lg:col-span-2 space-y-6">
+      {!isStaff && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Revenue SVG Chart */}
+          <div className="luxury-card p-6 lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-sm uppercase tracking-widest font-semibold flex items-center gap-1 text-[#f5f5f0]">
               <TrendingUp className="w-4 h-4 text-[#d4af37]" /> Revenue Trend (Last 6 Months)
@@ -340,6 +412,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Recent Orders & Deadlines calendar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -458,18 +531,12 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Portal Password (For client access)</label>
-                <input type="password" value={clientForm.portalPassword} onChange={(e) => setClientForm({ ...clientForm, portalPassword: e.target.value })} className="w-full luxury-input" placeholder="Set password for them to login" />
-              </div>
-              <div>
-                <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Address</label>
-                <input type="text" value={clientForm.address} onChange={(e) => setClientForm({ ...clientForm, address: e.target.value })} className="w-full luxury-input" />
-              </div>
-              <div>
                 <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Notes</label>
                 <textarea rows={3} value={clientForm.notes} onChange={(e) => setClientForm({ ...clientForm, notes: e.target.value })} className="w-full luxury-input resize-none" />
               </div>
-              <button type="submit" className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2">Add Client Profile</button>
+              <button type="submit" disabled={isSubmitting} className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2 disabled:opacity-50">
+                {isSubmitting ? 'Creating Profile...' : 'Add Client Profile'}
+              </button>
             </form>
           </div>
         </div>
@@ -540,7 +607,9 @@ export default function DashboardPage() {
                 <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Notes / Instructions</label>
                 <textarea rows={3} value={orderForm.notes} onChange={(e) => setOrderForm({ ...orderForm, notes: e.target.value })} className="w-full luxury-input resize-none" />
               </div>
-              <button type="submit" className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2">Initialize Order</button>
+              <button type="submit" disabled={isSubmitting} className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2 disabled:opacity-50">
+                {isSubmitting ? 'Initializing...' : 'Initialize Order'}
+              </button>
             </form>
           </div>
         </div>
@@ -587,8 +656,59 @@ export default function DashboardPage() {
                 <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Task Details</label>
                 <textarea rows={3} value={taskForm.description} onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })} className="w-full luxury-input resize-none" />
               </div>
-              <button type="submit" className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2">Add Task</button>
+              <button type="submit" disabled={isSubmitting} className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2 disabled:opacity-50">
+                {isSubmitting ? 'Adding...' : 'Add Task'}
+              </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* OVERLAY MODAL: TEAM MANAGEMENT */}
+      {isAdmin && isStaffModalOpen && (
+        <div className="fixed inset-0 bg-[#050505]/85 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="w-full max-w-2xl bg-[#111] border border-[#1f1b12] rounded-xl p-6 relative max-h-[90vh] overflow-y-auto flex flex-col md:flex-row gap-8">
+            <button onClick={() => setIsStaffModalOpen(false)} className="absolute top-4 right-4 text-[#8e8e88] hover:text-[#f5f5f0] cursor-pointer">
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="flex-1 space-y-4 text-xs border-r border-[#1f1b12]/50 pr-6">
+              <h3 className="text-lg font-serif text-[#f5f5f0] mb-4 uppercase tracking-widest border-b border-[#1f1b12] pb-2">Add Staff Member</h3>
+              <form onSubmit={handleCreateStaff} className="space-y-4">
+                <div>
+                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Full Name</label>
+                  <input type="text" required value={staffForm.name} onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} className="w-full luxury-input" />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Email</label>
+                  <input type="email" required value={staffForm.email} onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })} className="w-full luxury-input" />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Initial Password</label>
+                  <input type="text" required value={staffForm.password} onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })} className="w-full luxury-input" placeholder="They will be forced to change this" />
+                </div>
+                <button type="submit" disabled={isSubmitting} className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2 disabled:opacity-50">
+                  {isSubmitting ? 'Creating...' : 'Create Staff Account'}
+                </button>
+              </form>
+            </div>
+
+            <div className="flex-1 space-y-4 text-xs">
+              <h3 className="text-lg font-serif text-[#f5f5f0] mb-4 uppercase tracking-widest border-b border-[#1f1b12] pb-2">Active Staff</h3>
+              {staffList.length === 0 ? (
+                <p className="text-xs text-[#8e8e88] italic">No staff members found.</p>
+              ) : (
+                <div className="space-y-3">
+                  {staffList.map((staff) => (
+                    <div key={staff.id} className="border border-[#1f1b12] p-3 rounded bg-[#161616]">
+                      <p className="text-[#f5f5f0] font-semibold uppercase tracking-wider">{staff.name}</p>
+                      <p className="text-[#8e8e88] font-mono mt-1">{staff.email}</p>
+                      <p className="text-[#d4af37] text-[9px] uppercase tracking-widest mt-2">Added: {new Date(staff.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

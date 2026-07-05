@@ -14,11 +14,17 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
 
-    const userId = (session.user as any).id;
+    const userRole = (session.user as any).role;
+    let ownerId = (session.user as any).id;
+
+    if (userRole === 'STAFF') {
+      const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+      if (admin) ownerId = admin.id;
+    }
 
     const clients = await prisma.client.findMany({
       where: {
-        userId,
+        userId: ownerId,
         OR: [
           { firstName: { contains: search, mode: 'insensitive' } },
           { lastName: { contains: search, mode: 'insensitive' } },
@@ -58,7 +64,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
+    const userRole = (session.user as any).role;
+    let ownerId = (session.user as any).id;
+
+    if (userRole === 'STAFF') {
+      const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+      if (admin) ownerId = admin.id;
+    }
+
     const body = await req.json();
 
     const {
@@ -109,7 +122,7 @@ export async function POST(req: Request) {
         measurements: measurements || {},
         portalPassword: hashedPortalPassword,
         needsPasswordChange: true, // Force password change on next login
-        userId,
+        userId: ownerId,
       },
     });
 

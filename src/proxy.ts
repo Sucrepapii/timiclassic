@@ -61,6 +61,11 @@ export async function proxy(req: NextRequest) {
       }
       return NextResponse.redirect(new URL('/login', req.url));
     }
+    
+    // Enforce temporary password change for Staff
+    if (token.needsPasswordChange && pathname !== '/change-password') {
+      return NextResponse.redirect(new URL('/change-password', req.url));
+    }
     if (token.role === 'CLIENT') {
       if (pathname.startsWith('/api/')) {
         if (
@@ -92,6 +97,7 @@ export const config = {
     '/communications/:path*',
     '/tasks/:path*',
     '/portal/:path*',
+    '/change-password/:path*',
     '/api/:path*',
   ],
 };

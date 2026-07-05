@@ -13,11 +13,17 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const clientId = searchParams.get('clientId');
 
-    const userId = (session.user as any).id;
+    const userRole = (session.user as any).role;
+    let ownerId = (session.user as any).id;
+
+    if (userRole === 'STAFF') {
+      const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+      if (admin) ownerId = admin.id;
+    }
 
     const whereClause: any = {
       client: {
-        userId,
+        userId: ownerId,
       },
     };
 
@@ -70,22 +76,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Client selection and message content are required' }, { status: 400 });
     }
 
-    const userId = (session.user as any).id;
-    const role = (session.user as any).role;
+    const userRole = (session.user as any).role;
+    let ownerId = (session.user as any).id;
+
+    if (userRole === 'STAFF') {
+      const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+      if (admin) ownerId = admin.id;
+    }
 
     let client;
-    if (role === 'CLIENT') {
+    if (userRole === 'CLIENT') {
       // Client is sending message to designer
-      if (clientId !== userId) {
+      if (clientId !== ownerId) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
       }
       client = await prisma.client.findUnique({
         where: { id: clientId },
       });
     } else {
-      // Designer is sending message to client
+      // Designer/Staff is sending message to client
       client = await prisma.client.findFirst({
-        where: { id: clientId, userId },
+        where: { id: clientId, userId: ownerId },
       });
     }
 

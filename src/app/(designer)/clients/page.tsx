@@ -20,6 +20,7 @@ import {
   Edit2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useSession } from 'next-auth/react';
 
 interface Client {
   id: string;
@@ -41,6 +42,9 @@ export default function ClientsPage() {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const { data: session } = useSession();
+  const isStaff = (session?.user as any)?.role === 'STAFF';
 
   // Modals / forms states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -65,6 +69,7 @@ export default function ClientsPage() {
   const [editForm, setEditForm] = useState({ firstName: '', lastName: '', email: '', phone: '', address: '', notes: '' });
   const [measureForm, setMeasureForm] = useState({ chest: '', waist: '', hips: '', shoulder: '', sleeve: '', custom: '' });
   const [uploading, setUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchClients = async () => {
     try {
@@ -108,6 +113,7 @@ export default function ClientsPage() {
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const res = await fetch('/api/clients', {
         method: 'POST',
@@ -129,12 +135,15 @@ export default function ClientsPage() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedClientId) return;
+    setIsSubmitting(true);
     try {
       const res = await fetch(`/api/clients/${selectedClientId}`, {
         method: 'PUT',
@@ -151,6 +160,8 @@ export default function ClientsPage() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -169,6 +180,7 @@ export default function ClientsPage() {
       sets: [newSet, ...currentSets],
     };
 
+    setIsSubmitting(true);
     try {
       const res = await fetch(`/api/clients/${selectedClient.id}`, {
         method: 'PUT',
@@ -189,6 +201,8 @@ export default function ClientsPage() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -270,12 +284,14 @@ export default function ClientsPage() {
           <h1 className="text-3xl font-serif text-[#f5f5f0] tracking-wide">Client Directory</h1>
           <p className="text-xs text-[#8e8e88] uppercase tracking-widest mt-1">Manage measurements and client profiles</p>
         </div>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="luxury-btn-primary flex items-center gap-2 text-xs uppercase tracking-widest font-semibold px-4 py-2.5"
-        >
-          <Plus className="w-4 h-4" /> New Client
-        </button>
+        {!isStaff && (
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="luxury-btn-primary flex items-center gap-2 text-xs uppercase tracking-widest font-semibold px-4 py-2.5 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" /> New Client
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[500px]">
@@ -335,22 +351,24 @@ export default function ClientsPage() {
                     Client since {new Date(selectedClient.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="p-2 border border-[#1f1b12] text-[#8e8e88] hover:text-[#d4af37] hover:bg-[#161616] rounded-lg transition-all cursor-pointer"
-                    title="Edit Profile"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={handleDeleteClient}
-                    className="p-2 border border-red-950 text-red-800 hover:text-red-400 hover:bg-red-950/20 rounded-lg transition-all cursor-pointer"
-                    title="Delete Client"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                {!isStaff && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setIsEditModalOpen(true)}
+                      className="p-2 border border-[#1f1b12] text-[#8e8e88] hover:text-[#d4af37] hover:bg-[#161616] rounded-lg transition-all cursor-pointer"
+                      title="Edit Profile"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={handleDeleteClient}
+                      className="p-2 border border-red-950 text-red-800 hover:text-red-400 hover:bg-red-950/20 rounded-lg transition-all cursor-pointer"
+                      title="Delete Client"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Client Contact Info */}
@@ -383,12 +401,14 @@ export default function ClientsPage() {
                   <h3 className="text-xs uppercase tracking-widest font-semibold text-[#f5f5f0] flex items-center gap-1.5">
                     <Scissors className="w-4 h-4 text-[#d4af37]" /> Measurement Log
                   </h3>
-                  <button
-                    onClick={() => setIsMeasureModalOpen(true)}
-                    className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest text-[#d4af37] hover:underline"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Log Measurements
-                  </button>
+                  {!isStaff && (
+                    <button
+                      onClick={() => setIsMeasureModalOpen(true)}
+                      className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest text-[#d4af37] hover:underline cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Log Measurements
+                    </button>
+                  )}
                 </div>
 
                 {!selectedClient.measurements?.sets || selectedClient.measurements.sets.length === 0 ? (
@@ -573,7 +593,9 @@ export default function ClientsPage() {
                 <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Notes</label>
                 <textarea rows={3} value={editForm.notes} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} className="w-full luxury-input resize-none" />
               </div>
-              <button type="submit" className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2">Save Profile Updates</button>
+              <button type="submit" disabled={isSubmitting} className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2 disabled:opacity-50">
+                {isSubmitting ? 'Saving Updates...' : 'Save Profile Updates'}
+              </button>
             </form>
           </div>
         </div>
@@ -616,7 +638,9 @@ export default function ClientsPage() {
                 <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Custom Notes (Height, Back Width, etc.)</label>
                 <input type="text" value={measureForm.custom} onChange={(e) => setMeasureForm({ ...measureForm, custom: e.target.value })} className="w-full luxury-input" placeholder="e.g. Height: 5ft 8in, Hollow to Hem: 56in" />
               </div>
-              <button type="submit" className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2">Log New Specs</button>
+              <button type="submit" disabled={isSubmitting} className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2 disabled:opacity-50">
+                {isSubmitting ? 'Logging...' : 'Log New Specs'}
+              </button>
             </form>
           </div>
         </div>
@@ -652,14 +676,12 @@ export default function ClientsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Address</label>
-                <input type="text" value={addForm.address} onChange={(e) => setAddForm({ ...addForm, address: e.target.value })} className="w-full luxury-input" />
-              </div>
-              <div>
                 <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Notes</label>
                 <textarea rows={3} value={addForm.notes} onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })} className="w-full luxury-input resize-none" />
               </div>
-              <button type="submit" className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2">Create Profile</button>
+              <button type="submit" disabled={isSubmitting} className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2 disabled:opacity-50">
+                {isSubmitting ? 'Creating...' : 'Create Profile'}
+              </button>
             </form>
           </div>
         </div>

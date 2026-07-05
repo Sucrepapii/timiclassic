@@ -13,11 +13,14 @@ model User {
   name          String
   email         String    @unique
   password      String?   // Hashed password
+  needsPasswordChange Boolean @default(false) // Admin is false, Staff is true by default
   image         String?
   role          Role      @default(USER)
   clients       Client[]
   orders        Order[]
   tasks         Task[]
+  sentMessages     InternalMessage[] @relation("SentMessages")
+  receivedMessages InternalMessage[] @relation("ReceivedMessages")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -115,8 +118,20 @@ model Communication {
   createdAt       DateTime    @default(now())
 }
 
+model InternalMessage {
+  id          String   @id @default(cuid())
+  content     String   @db.Text
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
 enum Role {
   USER
+  STAFF
   ADMIN
 }
 

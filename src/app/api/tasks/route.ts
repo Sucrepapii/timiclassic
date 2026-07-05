@@ -14,11 +14,17 @@ export async function GET(req: Request) {
     const orderId = searchParams.get('orderId');
     const status = searchParams.get('status');
 
-    const userId = (session.user as any).id;
+    const userRole = (session.user as any).role;
+    let ownerId = (session.user as any).id;
+
+    if (userRole === 'STAFF') {
+      const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+      if (admin) ownerId = admin.id;
+    }
 
     const whereClause: any = {
       order: {
-        userId,
+        userId: ownerId,
       },
     };
 
@@ -78,11 +84,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Task title and orderId are required' }, { status: 400 });
     }
 
-    const userId = (session.user as any).id;
+    const userRole = (session.user as any).role;
+    let ownerId = (session.user as any).id;
+
+    if (userRole === 'STAFF') {
+      const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+      if (admin) ownerId = admin.id;
+    }
 
     // Verify order belongs to active designer
     const order = await prisma.order.findFirst({
-      where: { id: orderId, userId },
+      where: { id: orderId, userId: ownerId },
     });
 
     if (!order) {

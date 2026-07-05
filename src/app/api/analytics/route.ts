@@ -12,7 +12,13 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
+    const userRole = (session.user as any).role;
+    let userId = (session.user as any).id;
+
+    if (userRole === 'STAFF') {
+      const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+      if (admin) userId = admin.id;
+    }
 
     // 1. Client count
     const clientCount = await prisma.client.count({

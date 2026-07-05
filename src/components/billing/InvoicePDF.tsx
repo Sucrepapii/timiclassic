@@ -178,6 +178,7 @@ interface InvoicePDFProps {
     totalAmount: number | null;
     depositPaid: number | null;
     balanceDue: number | null;
+    status: string;
     notes: string | null;
     client: {
       firstName: string;
@@ -230,7 +231,7 @@ export function InvoicePDF({ order }: InvoicePDFProps) {
           </View>
           <View style={styles.metaBlock}>
             <Text style={styles.metaTitle}>Order Logistics</Text>
-            <Text style={styles.metaText}>Status: Active Production</Text>
+            <Text style={styles.metaText}>Status: {order.status === 'DONE' ? 'Completed' : 'Active Production'}</Text>
             <Text style={styles.metaText}>Delivery Target: {deliveryDate}</Text>
           </View>
         </View>
@@ -299,8 +300,11 @@ export function InvoicePDF({ order }: InvoicePDFProps) {
         {/* Footer Notes */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Thank you for choosing Timiclassic Bespoke Clothing.</Text>
-          <Text style={[styles.footerText, { marginTop: 3, fontSize: 6 }]}>
-            Payments are non-refundable for custom-cut textiles. Terms: 50% deposit, 50% due at final fitting.
+          <Text style={[styles.footerText, { marginTop: 3, fontSize: 8, color: '#050505' }]}>
+            Remit payment to: [ACCOUNT NUMBER] (Timiclassic Bank)
+          </Text>
+          <Text style={[styles.footerText, { marginTop: 5, fontSize: 6 }]}>
+            Payments are non-refundable for custom-cut textiles. Terms: 80% deposit, 20% due at final fitting.
           </Text>
         </View>
       </Page>

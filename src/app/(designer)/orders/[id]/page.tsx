@@ -70,6 +70,9 @@ interface Order {
 }
 
 export default function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { data: session } = useSession();
+  const isStaff = (session?.user as any)?.role === 'STAFF';
+
   const resolvedParams = use(params);
   const id = resolvedParams.id;
   const [order, setOrder] = useState<Order | null>(null);
@@ -87,6 +90,8 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
   // Task creation
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [taskForm, setTaskForm] = useState({ title: '', description: '', priority: 'MEDIUM', dueDate: '', garmentId: '' });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Timer store variables
   const { activeTaskId, isRunning, startTimer, elapsedSeconds } = useTimerStore();
@@ -187,6 +192,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
 
   const handleUpdateFinance = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const res = await fetch(`/api/orders/${id}`, {
         method: 'PUT',
@@ -206,11 +212,14 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const res = await fetch('/api/tasks', {
         method: 'POST',
@@ -231,6 +240,8 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -281,34 +292,36 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* Action controls */}
-        <div className="flex items-center gap-3 shrink-0">
-          <button
-            onClick={() => setIsFinModalOpen(true)}
-            className="flex items-center gap-1 bg-[#161616] hover:bg-[#d4af37]/5 border border-[#1f1b12] text-[#d4af37] px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider cursor-pointer"
-          >
-            <Banknote className="w-4 h-4" /> Log Payments
-          </button>
-          
-          {/* Dynamic Invoice PDF Link */}
-          {isClientSide && (
-            <PDFDownloadLink
-              document={<InvoicePDF order={order} />}
-              fileName={`invoice-${order.orderNumber}.pdf`}
-              className="flex items-center gap-1 bg-[#d4af37] hover:opacity-95 text-[#050505] px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-widest shadow-[0_0_12px_rgba(212,175,55,0.25)] transition-all cursor-pointer"
+        {!isStaff && (
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => setIsFinModalOpen(true)}
+              className="flex items-center gap-1 bg-[#161616] hover:bg-[#d4af37]/5 border border-[#1f1b12] text-[#d4af37] px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider cursor-pointer"
             >
-              {({ loading: pdfLoading }) =>
-                pdfLoading ? (
-                  <span>Compiling PDF...</span>
-                ) : (
-                  <>
-                    <Download className="w-4 h-4 text-black" />
-                    <span>Download Invoice</span>
-                  </>
-                )
-              }
-            </PDFDownloadLink>
-          )}
-        </div>
+              <Banknote className="w-4 h-4" /> Log Payments
+            </button>
+            
+            {/* Dynamic Invoice PDF Link */}
+            {isClientSide && (
+              <PDFDownloadLink
+                document={<InvoicePDF order={order} />}
+                fileName={`invoice-${order.orderNumber}.pdf`}
+                className="flex items-center gap-1 bg-[#d4af37] hover:opacity-95 text-[#050505] px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-widest shadow-[0_0_12px_rgba(212,175,55,0.25)] transition-all cursor-pointer"
+              >
+                {({ loading: pdfLoading }) =>
+                  pdfLoading ? (
+                    <span>Compiling PDF...</span>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 text-black" />
+                      <span>Download Invoice</span>
+                    </>
+                  )
+                }
+              </PDFDownloadLink>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Grid: Garments and Tasks */}
@@ -363,12 +376,14 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
               <h3 className="text-xs uppercase tracking-widest font-bold text-[#d4af37] flex items-center gap-1.5">
                 <CheckSquare className="w-4 h-4" /> Production Task Checklist
               </h3>
-              <button
-                onClick={() => setIsTaskModalOpen(true)}
-                className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest text-[#d4af37] hover:underline"
-              >
-                <Plus className="w-3.5 h-3.5" /> Add Task
-              </button>
+              {!isStaff && (
+                <button
+                  onClick={() => setIsTaskModalOpen(true)}
+                  className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest text-[#d4af37] hover:underline"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Task
+                </button>
+              )}
             </div>
 
             {order.tasks.length === 0 ? (
@@ -490,25 +505,27 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           </div>
 
           {/* Finances */}
-          <div className="luxury-card p-6 space-y-4 bg-[#111]">
-            <h4 className="text-xs uppercase tracking-widest font-bold text-[#d4af37] border-b border-[#1f1b12]/50 pb-2">
-              Order Ledger
-            </h4>
-            <div className="space-y-4 text-xs">
-              <div className="flex justify-between border-b border-[#1f1b12]/30 pb-2">
-                <span className="text-[#8e8e88] uppercase tracking-widest text-[9px] font-semibold">Total Price</span>
-                <span className="font-bold text-[#f5f5f0]">₦{(order.totalAmount || 0).toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between border-b border-[#1f1b12]/30 pb-2">
-                <span className="text-[#8e8e88] uppercase tracking-widest text-[9px] font-semibold">Deposit Paid</span>
-                <span className="font-bold text-emerald-400">-₦{(order.depositPaid || 0).toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between border-b border-[#1f1b12]/30 pb-2">
-                <span className="text-[#8e8e88] uppercase tracking-widest text-[9px] font-semibold">Balance Due</span>
-                <span className="font-bold text-amber-500 font-mono text-sm">₦{(order.balanceDue || 0).toLocaleString()}</span>
+          {!isStaff && (
+            <div className="luxury-card p-6 space-y-4 bg-[#111]">
+              <h4 className="text-xs uppercase tracking-widest font-bold text-[#d4af37] border-b border-[#1f1b12]/50 pb-2">
+                Order Ledger
+              </h4>
+              <div className="space-y-4 text-xs">
+                <div className="flex justify-between border-b border-[#1f1b12]/30 pb-2">
+                  <span className="text-[#8e8e88] uppercase tracking-widest text-[9px] font-semibold">Total Price</span>
+                  <span className="font-bold text-[#f5f5f0]">₦{(order.totalAmount || 0).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between border-b border-[#1f1b12]/30 pb-2">
+                  <span className="text-[#8e8e88] uppercase tracking-widest text-[9px] font-semibold">Deposit Paid</span>
+                  <span className="font-bold text-emerald-400">-₦{(order.depositPaid || 0).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between border-b border-[#1f1b12]/30 pb-2">
+                  <span className="text-[#8e8e88] uppercase tracking-widest text-[9px] font-semibold">Balance Due</span>
+                  <span className="font-bold text-amber-500 font-mono text-sm">₦{(order.balanceDue || 0).toLocaleString()}</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -541,7 +558,9 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                   className="w-full luxury-input"
                 />
               </div>
-              <button type="submit" className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2">Log Ledgers</button>
+              <button type="submit" disabled={isSubmitting} className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2 disabled:opacity-50">
+                {isSubmitting ? 'Logging...' : 'Log Ledgers'}
+              </button>
             </form>
           </div>
         </div>
@@ -599,7 +618,9 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                   className="w-full luxury-input resize-none"
                 />
               </div>
-              <button type="submit" className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2">Create Task</button>
+              <button type="submit" disabled={isSubmitting} className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2 disabled:opacity-50">
+                {isSubmitting ? 'Creating...' : 'Create Task'}
+              </button>
             </form>
           </div>
         </div>

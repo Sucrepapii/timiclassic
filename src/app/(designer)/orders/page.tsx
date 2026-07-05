@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import {
   Scissors,
   Plus,
@@ -10,7 +11,9 @@ import {
   ChevronRight,
   TrendingUp,
   Filter,
-  Search
+  Search,
+  ArrowRight,
+  Clock
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -28,6 +31,8 @@ interface Order {
 }
 
 export default function OrdersPage() {
+  const { data: session } = useSession();
+  const isStaff = (session?.user as any)?.role === 'STAFF';
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -85,7 +90,6 @@ export default function OrdersPage() {
     }
   };
 
-  // Filter orders
   const filteredOrders = orders.filter((o) => {
     const nameMatch = `${o.client.firstName} ${o.client.lastName}`.toLowerCase().includes(search.toLowerCase()) || o.orderNumber.toLowerCase().includes(search.toLowerCase());
     const statusMatch = !statusFilter || o.status === statusFilter;
@@ -102,7 +106,6 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Filter panel */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#111] border border-[#1f1b12] p-4 rounded-xl">
         <div className="flex items-center gap-2 bg-[#161616] border border-[#1f1b12]/50 px-3 py-2 rounded-lg text-xs">
           <Search className="w-4 h-4 text-[#8e8e88]" />
@@ -153,7 +156,6 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Orders Table list */}
       <div className="bg-[#111] border border-[#1f1b12] rounded-xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
@@ -164,9 +166,13 @@ export default function OrdersPage() {
                 <th className="p-4">Garments</th>
                 <th className="p-4">Status</th>
                 <th className="p-4">Priority</th>
-                <th className="p-4 text-right">Total Price</th>
-                <th className="p-4 text-right">Deposit</th>
-                <th className="p-4 text-right">Balance Due</th>
+                {!isStaff && (
+                  <>
+                    <th className="p-4 text-right">Total Price</th>
+                    <th className="p-4 text-right">Deposit</th>
+                    <th className="p-4 text-right">Balance Due</th>
+                  </>
+                )}
                 <th className="p-4">Due Date</th>
                 <th className="p-4 text-center">Actions</th>
               </tr>
@@ -174,11 +180,11 @@ export default function OrdersPage() {
             <tbody className="divide-y divide-[#1f1b12]/40 text-[#f5f5f0]">
               {loading ? (
                 <tr>
-                  <td colSpan={10} className="p-8 text-center text-[#8e8e88] uppercase tracking-widest animate-pulse">Loading orders...</td>
+                  <td colSpan={isStaff ? 7 : 10} className="p-8 text-center text-[#8e8e88] uppercase tracking-widest animate-pulse">Loading orders...</td>
                 </tr>
               ) : filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="p-8 text-center text-[#8e8e88] italic">No custom clothing orders matching the filters.</td>
+                  <td colSpan={isStaff ? 7 : 10} className="p-8 text-center text-[#8e8e88] italic">No custom clothing orders matching the filters.</td>
                 </tr>
               ) : (
                 filteredOrders.map((order) => {
@@ -201,9 +207,13 @@ export default function OrdersPage() {
                           {order.priority}
                         </span>
                       </td>
-                      <td className="p-4 text-right font-semibold">₦{order.totalAmount?.toLocaleString() || '0.00'}</td>
-                      <td className="p-4 text-right text-emerald-400 font-medium">₦{order.depositPaid?.toLocaleString() || '0.00'}</td>
-                      <td className="p-4 text-right text-amber-500 font-bold">₦{balance.toLocaleString() || '0.00'}</td>
+                      {!isStaff && (
+                        <>
+                          <td className="p-4 text-right font-semibold">₦{order.totalAmount?.toLocaleString() || '0.00'}</td>
+                          <td className="p-4 text-right text-emerald-400 font-medium">₦{order.depositPaid?.toLocaleString() || '0.00'}</td>
+                          <td className="p-4 text-right text-amber-500 font-bold">₦{balance.toLocaleString() || '0.00'}</td>
+                        </>
+                      )}
                       <td className="p-4 font-medium">
                         {order.dueDate ? new Date(order.dueDate).toLocaleDateString() : 'N/A'}
                       </td>

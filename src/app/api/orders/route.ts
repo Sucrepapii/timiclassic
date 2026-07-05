@@ -14,9 +14,15 @@ export async function GET(req: Request) {
     const status = searchParams.get('status') || '';
     const clientId = searchParams.get('clientId') || '';
 
-    const userId = (session.user as any).id;
+    const userRole = (session.user as any).role;
+    let ownerId = (session.user as any).id;
 
-    const whereClause: any = { userId };
+    if (userRole === 'STAFF') {
+      const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+      if (admin) ownerId = admin.id;
+    }
+
+    const whereClause: any = { userId: ownerId };
     if (status) whereClause.status = status;
     if (clientId) whereClause.clientId = clientId;
 
@@ -58,7 +64,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
+    const userRole = (session.user as any).role;
+    let ownerId = (session.user as any).id;
+
+    if (userRole === 'STAFF') {
+      const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+      if (admin) ownerId = admin.id;
+    }
     const body = await req.json();
 
     const {
@@ -110,7 +122,7 @@ export async function POST(req: Request) {
         balanceDue,
         dueDate: dueDate ? new Date(dueDate) : null,
         notes,
-        userId,
+        userId: ownerId,
         garments: {
           create: garments?.map((g: any) => ({
             name: g.name,

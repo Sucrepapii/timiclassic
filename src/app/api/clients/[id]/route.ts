@@ -66,6 +66,14 @@ export async function PUT(
     const role = (session.user as any).role;
     const userId = (session.user as any).id;
     
+    // If role is STAFF, they can ONLY update measurements (for sketches/photos).
+    // The rest of the payload is ignored.
+    if (role === 'STAFF') {
+      if (measurements === undefined) {
+        return NextResponse.json({ error: 'Forbidden. Staff can only update measurements and sketches.' }, { status: 403 });
+      }
+    }
+    
     if (role === 'CLIENT' && params.id !== userId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -90,15 +98,20 @@ export async function PUT(
       }
     }
 
-    const updateData: any = {
-      firstName,
-      lastName,
-      email: emailKey,
-      phone,
-      address,
-      notes,
-      measurements,
-    };
+    const updateData: any = {};
+
+    if (role !== 'STAFF') {
+      updateData.firstName = firstName;
+      updateData.lastName = lastName;
+      updateData.email = emailKey;
+      updateData.phone = phone;
+      updateData.address = address;
+      updateData.notes = notes;
+    }
+    
+    if (measurements !== undefined) {
+      updateData.measurements = measurements;
+    }
 
     if (portalPassword) {
       updateData.portalPassword = await bcrypt.hash(portalPassword, 10);
@@ -125,6 +138,11 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const role = (session.user as any).role;
+    if (role === 'STAFF') {
+      return NextResponse.json({ error: 'Forbidden. Staff cannot delete clients.' }, { status: 403 });
     }
 
     // Cascade safety or delete orders first (in our schema orders reference clients.

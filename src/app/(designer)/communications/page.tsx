@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import {
   Mail,
   Send,
@@ -61,9 +62,21 @@ const TEMPLATES = [
 ];
 
 export default function CommunicationsHub() {
+  const { data: session } = useSession();
+  const myId = (session?.user as any)?.id;
+  
+  const [activeTab, setActiveTab] = useState<'CLIENT' | 'INTERNAL'>('CLIENT');
+  
   const [comms, setComms] = useState<CommLog[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Internal chat states
+  const [internalPeers, setInternalPeers] = useState<{id: string, name: string, role: string}[]>([]);
+  const [selectedPeerId, setSelectedPeerId] = useState('');
+  const [internalMessages, setInternalMessages] = useState<any[]>([]);
+  const [internalContent, setInternalContent] = useState('');
+  const [loadingInternal, setLoadingInternal] = useState(false);
 
   // Send message form states
   const [selectedClientId, setSelectedClientId] = useState('');
@@ -147,6 +160,69 @@ export default function CommunicationsHub() {
     }
   };
 
+  const fetchInternalPeers = async () => {
+    try {
+      const res = await fetch('/api/internal-messages');
+      if (res.ok) {
+        const data = await res.json();
+        setInternalPeers(data.peers || []);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchInternalMessages = async (peerId: string) => {
+    if (!peerId) return;
+    setLoadingInternal(true);
+    try {
+      const res = await fetch(`/api/internal-messages?peerId=${peerId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setInternalMessages(data.messages || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingInternal(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'INTERNAL') {
+      fetchInternalPeers();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (selectedPeerId) {
+      fetchInternalMessages(selectedPeerId);
+    }
+  }, [selectedPeerId]);
+
+  const handleSendInternal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPeerId || !internalContent.trim()) return;
+    setSending(true);
+    try {
+      const res = await fetch('/api/internal-messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ receiverId: selectedPeerId, content: internalContent }),
+      });
+      if (res.ok) {
+        setInternalContent('');
+        fetchInternalMessages(selectedPeerId);
+      } else {
+        toast.error('Failed to send message');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSending(false);
+    }
+  };
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'EMAIL':
@@ -166,10 +242,26 @@ export default function CommunicationsHub() {
       <div>
         <h1 className="text-3xl font-serif text-[#f5f5f0] tracking-wide">Communication Hub</h1>
         <p className="text-xs text-[#8e8e88] uppercase tracking-widest mt-1">
-          Draft template emails, log calls, and coordinate custom updates
+          Coordinate custom updates and collaborate with your team
         </p>
       </div>
 
+      <div className="flex items-center gap-4 border-b border-[#1f1b12] pb-2">
+        <button 
+          onClick={() => setActiveTab('CLIENT')}
+          className={`text-xs uppercase tracking-widest font-bold pb-2 border-b-2 transition-all cursor-pointer ${activeTab === 'CLIENT' ? 'text-[#d4af37] border-[#d4af37]' : 'text-[#8e8e88] border-transparent hover:text-[#f5f5f0]'}`}
+        >
+          Client Comms
+        </button>
+        <button 
+          onClick={() => setActiveTab('INTERNAL')}
+          className={`text-xs uppercase tracking-widest font-bold pb-2 border-b-2 transition-all cursor-pointer ${activeTab === 'INTERNAL' ? 'text-[#d4af37] border-[#d4af37]' : 'text-[#8e8e88] border-transparent hover:text-[#f5f5f0]'}`}
+        >
+          Internal Team Chat
+        </button>
+      </div>
+
+      {activeTab === 'CLIENT' ? (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[500px]">
         {/* Left column: compose form */}
         <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 h-[550px] overflow-y-auto">
@@ -298,6 +390,87 @@ export default function CommunicationsHub() {
           )}
         </div>
       </div>
+      ) : (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[500px]">
+        {/* Left: Chat list / Compose */}
+        <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 h-[550px] flex flex-col">
+          <h3 className="text-xs uppercase tracking-widest font-bold text-[#d4af37] border-b border-[#1f1b12]/50 pb-2 mb-4 shrink-0">
+            Select Team Member
+          </h3>
+          <select 
+            value={selectedPeerId}
+            onChange={(e) => setSelectedPeerId(e.target.value)}
+            className="w-full luxury-input mb-6 shrink-0"
+          >
+            <option value="">-- Choose team member --</option>
+            {internalPeers.map((p: any) => (
+              <option key={p.id} value={p.id}>
+                {p.name || (p.role === 'ADMIN' ? 'System Admin' : p.email || 'Unnamed Staff')} ({p.role})
+              </option>
+            ))}
+          </select>
+
+          {selectedPeerId ? (
+            <form onSubmit={handleSendInternal} className="mt-auto space-y-4 shrink-0 border-t border-[#1f1b12]/50 pt-4">
+              <div>
+                <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Message</label>
+                <textarea
+                  rows={4}
+                  required
+                  value={internalContent}
+                  onChange={(e) => setInternalContent(e.target.value)}
+                  className="w-full luxury-input resize-none font-sans"
+                  placeholder="Type a message to your team member..."
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={sending}
+                className="w-full luxury-btn-primary flex items-center justify-center gap-1.5 uppercase tracking-widest py-3 mt-2 disabled:opacity-50 cursor-pointer"
+              >
+                <Send className="w-4 h-4" />
+                {sending ? 'Sending...' : 'Send Message'}
+              </button>
+            </form>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-xs text-[#8e8e88] italic text-center">
+              Please select a team member from the dropdown above to start chatting.
+            </div>
+          )}
+        </div>
+
+        {/* Right: Chat History */}
+        <div className="lg:col-span-2 bg-[#111] border border-[#1f1b12] rounded-xl p-6 h-[550px] flex flex-col space-y-4">
+          <h3 className="text-xs uppercase tracking-widest font-bold text-[#d4af37] border-b border-[#1f1b12]/50 pb-2 shrink-0">
+            Chat History
+          </h3>
+          
+          {!selectedPeerId ? (
+             <div className="flex-1 flex items-center justify-center text-xs text-[#8e8e88] italic">Select a team member to view chat history.</div>
+          ) : loadingInternal ? (
+             <div className="flex-1 flex items-center justify-center text-xs text-[#8e8e88] animate-pulse">Loading messages...</div>
+          ) : internalMessages.length === 0 ? (
+             <div className="flex-1 flex items-center justify-center text-xs text-[#8e8e88] italic">No messages yet. Say hello!</div>
+          ) : (
+            <div className="flex-1 space-y-4 overflow-y-auto pr-2 pb-4">
+              {internalMessages.map((msg) => {
+                const isMine = msg.senderId === myId;
+                return (
+                  <div key={msg.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} gap-1 text-xs`}>
+                    <span className="text-[9px] uppercase tracking-widest text-[#8e8e88] px-1">
+                      {isMine ? 'You' : msg.sender.name} • {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </span>
+                    <div className={`p-3 rounded-xl max-w-[80%] ${isMine ? 'bg-[#d4af37]/10 border border-[#d4af37]/30 text-[#f5f5f0]' : 'bg-[#161616] border border-[#1f1b12] text-[#8e8e88]'}`}>
+                      {msg.content}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+      )}
     </div>
   );
 }
