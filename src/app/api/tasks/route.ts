@@ -84,8 +84,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Task title and orderId are required' }, { status: 400 });
     }
 
+    const userId = (session.user as any).id;
     const userRole = (session.user as any).role;
-    let ownerId = (session.user as any).id;
+    let ownerId = userId;
 
     if (userRole === 'STAFF') {
       const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
