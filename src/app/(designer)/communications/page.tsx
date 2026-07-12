@@ -64,8 +64,9 @@ const TEMPLATES = [
 export default function CommunicationsHub() {
   const { data: session } = useSession();
   const myId = (session?.user as any)?.id;
+  const isStaff = (session?.user as any)?.role === 'STAFF';
   
-  const [activeTab, setActiveTab] = useState<'CLIENT' | 'INTERNAL'>('CLIENT');
+  const [activeTab, setActiveTab] = useState<'CLIENT' | 'INTERNAL'>(isStaff ? 'INTERNAL' : 'CLIENT');
   
   const [comms, setComms] = useState<CommLog[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -247,12 +248,14 @@ export default function CommunicationsHub() {
       </div>
 
       <div className="flex items-center gap-4 border-b border-[#1f1b12] pb-2">
-        <button 
-          onClick={() => setActiveTab('CLIENT')}
-          className={`text-xs uppercase tracking-widest font-bold pb-2 border-b-2 transition-all cursor-pointer ${activeTab === 'CLIENT' ? 'text-[#d4af37] border-[#d4af37]' : 'text-[#8e8e88] border-transparent hover:text-[#f5f5f0]'}`}
-        >
-          Client Comms
-        </button>
+        {!isStaff && (
+          <button 
+            onClick={() => setActiveTab('CLIENT')}
+            className={`text-xs uppercase tracking-widest font-bold pb-2 border-b-2 transition-all cursor-pointer ${activeTab === 'CLIENT' ? 'text-[#d4af37] border-[#d4af37]' : 'text-[#8e8e88] border-transparent hover:text-[#f5f5f0]'}`}
+          >
+            Client Comms
+          </button>
+        )}
         <button 
           onClick={() => setActiveTab('INTERNAL')}
           className={`text-xs uppercase tracking-widest font-bold pb-2 border-b-2 transition-all cursor-pointer ${activeTab === 'INTERNAL' ? 'text-[#d4af37] border-[#d4af37]' : 'text-[#8e8e88] border-transparent hover:text-[#f5f5f0]'}`}
@@ -261,7 +264,7 @@ export default function CommunicationsHub() {
         </button>
       </div>
 
-      {activeTab === 'CLIENT' ? (
+      {(!isStaff && activeTab === 'CLIENT') ? (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[500px]">
         {/* Left column: compose form */}
         <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 h-[550px] overflow-y-auto">

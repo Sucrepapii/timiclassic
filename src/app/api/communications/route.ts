@@ -80,8 +80,7 @@ export async function POST(req: Request) {
     let ownerId = (session.user as any).id;
 
     if (userRole === 'STAFF') {
-      const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-      if (admin) ownerId = admin.id;
+      return NextResponse.json({ error: 'Staff members are not allowed to communicate directly with clients' }, { status: 403 });
     }
 
     let client;
