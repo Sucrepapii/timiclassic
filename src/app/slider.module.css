@@ -316,16 +316,43 @@
 
 @media screen and (max-width: 690px) {
   .list .item .content {
-      top: 40%;
+      top: 35%;
       left: 20px;
-      width: 90%;
+      width: calc(100% - 40px);
   }
 
-  .content .title, .content .name {
-      font-size: 35px;
+  .content .title {
+      font-size: 28px;
+  }
+  
+  .content .name {
+      font-size: 36px;
+  }
+
+  .content .des {
+      font-size: 13px;
+      margin-bottom: 20px;
+  }
+
+  .content .btn {
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 300px;
+  }
+
+  .content .btn button {
+      width: 100%;
+      padding: 10px 20px;
   }
   
   .arrows {
-      left: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 85%;
+  }
+
+  .carousel .list .item:nth-child(n+3) {
+      display: none;
   }
 }

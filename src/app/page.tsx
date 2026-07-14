@@ -142,7 +142,7 @@ export default function LandingPage() {
           <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-[#1f1b12] shadow-2xl">
             {/* Using one of the dress images as an about-us showcase */}
             <img 
-              src="/dresses/dress_gold.png" 
+              src="/dresses/couture-2 (6).jpeg" 
               alt="Timiclassic Atelier" 
               className="w-full h-full object-cover"
             />

@@ -2,10 +2,25 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { initialSlides } from '@/components/HeroSlider';
+import { allSlides } from '@/components/HeroSlider';
+import BookFittingModal from '@/components/BookFittingModal';
+import ViewDetailsModal from '@/components/ViewDetailsModal';
 import { Sparkles, ArrowLeft, Menu, X } from 'lucide-react';
 
 export default function CollectionsPage() {
+  const [isBookFittingOpen, setIsBookFittingOpen] = useState(false);
+  const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
+  const [selectedDress, setSelectedDress] = useState<any>(null);
+
+  const openBookFitting = (dress: any) => {
+    setSelectedDress(dress);
+    setIsBookFittingOpen(true);
+  };
+
+  const openViewDetails = (dress: any) => {
+    setSelectedDress(dress);
+    setIsViewDetailsOpen(true);
+  };
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -83,9 +98,9 @@ export default function CollectionsPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-          {initialSlides.map((slide) => (
-            <div key={slide.id} className="group relative w-full aspect-[3/4] rounded-2xl overflow-hidden border border-[#1f1b12] shadow-2xl bg-[#111]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+          {allSlides.map((slide) => (
+            <div key={slide.id} className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-[#1f1b12] shadow-2xl bg-[#111]">
               <img 
                 src={slide.image} 
                 alt={slide.name} 
@@ -104,11 +119,17 @@ export default function CollectionsPage() {
                   {slide.description}
                 </div>
                 
-                <div className="mt-6 flex gap-4 opacity-0 transform translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0">
-                  <button className="px-6 py-2 border border-[#d4af37] bg-[#d4af37] text-black text-xs font-bold uppercase tracking-widest hover:bg-transparent hover:text-[#d4af37] transition-colors rounded">
+                <div className="mt-6 flex flex-col sm:flex-row gap-4 opacity-100 transform translate-y-0 md:opacity-0 md:translate-y-4 transition-all duration-500 md:group-hover:opacity-100 md:group-hover:translate-y-0">
+                  <button 
+                    onClick={() => openViewDetails(slide)}
+                    className="w-full sm:w-auto px-6 py-3 sm:py-2 border border-[#d4af37] bg-[#d4af37] text-black text-xs font-bold uppercase tracking-widest hover:bg-transparent hover:text-[#d4af37] transition-colors rounded"
+                  >
                     View Details
                   </button>
-                  <button className="px-6 py-2 border border-white/30 text-white text-xs font-bold uppercase tracking-widest hover:border-[#d4af37] hover:text-[#d4af37] transition-colors rounded bg-transparent">
+                  <button 
+                    onClick={() => openBookFitting(slide)}
+                    className="w-full sm:w-auto px-6 py-3 sm:py-2 border border-white/30 text-white text-xs font-bold uppercase tracking-widest hover:border-[#d4af37] hover:text-[#d4af37] transition-colors rounded bg-transparent"
+                  >
                     Book Fitting
                   </button>
                 </div>
@@ -117,6 +138,21 @@ export default function CollectionsPage() {
           ))}
         </div>
       </section>
+
+      <BookFittingModal 
+        isOpen={isBookFittingOpen} 
+        onClose={() => setIsBookFittingOpen(false)} 
+        dressName={selectedDress?.name} 
+      />
+      
+      <ViewDetailsModal 
+        isOpen={isViewDetailsOpen} 
+        onClose={() => setIsViewDetailsOpen(false)} 
+        dress={selectedDress} 
+        onBookFitting={(dressName) => {
+          setIsBookFittingOpen(true);
+        }}
+      />
 
       {/* Footer */}
       <footer className="w-full border-t border-[#1f1b12]/40 py-8 text-center flex flex-col items-center gap-2 text-[10px] text-[#8e8e88] uppercase tracking-wider font-semibold bg-[#050505]">
