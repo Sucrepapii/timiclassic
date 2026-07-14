@@ -1,11 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { initialSlides } from '@/components/HeroSlider';
-import { Sparkles, ArrowLeft } from 'lucide-react';
+import { Sparkles, ArrowLeft, Menu, X } from 'lucide-react';
 
 export default function CollectionsPage() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <main className="min-h-screen bg-[#050505] text-[#f5f5f0] font-sans flex flex-col">
       {/* Navbar */}
@@ -27,13 +29,45 @@ export default function CollectionsPage() {
           </div>
         </div>
 
-        <Link
-          href="/login"
-          className="text-xs uppercase tracking-widest font-bold border border-[#d4af37]/50 bg-black/30 backdrop-blur-md hover:bg-[#d4af37]/10 text-[#f5f5f0] hover:text-[#d4af37] px-6 py-2.5 rounded-lg transition-all shadow-lg"
-        >
-          Access Portal
-        </Link>
+        <div className="flex items-center gap-8">
+          <div className="hidden md:flex gap-6 text-xs uppercase tracking-widest font-semibold text-[#8e8e88]">
+            <Link href="/" className="hover:text-[#d4af37] transition-colors">Home</Link>
+            <Link href="/#about" className="hover:text-[#d4af37] transition-colors">About Us</Link>
+            <Link href="/collections" className="text-[#d4af37] transition-colors">Collections</Link>
+          </div>
+
+          <Link
+            href="/login"
+            className="hidden md:block text-xs uppercase tracking-widest font-bold border border-[#d4af37]/50 bg-black/30 backdrop-blur-md hover:bg-[#d4af37]/10 text-[#f5f5f0] hover:text-[#d4af37] px-6 py-2.5 rounded-lg transition-all shadow-lg"
+          >
+            Access Portal
+          </Link>
+
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="md:hidden text-[#f5f5f0] hover:text-[#d4af37] transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-[190] bg-[#050505]/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden">
+          <Link href="/" onClick={() => setIsMenuOpen(false)} className="text-xl uppercase tracking-widest font-bold text-[#f5f5f0] hover:text-[#d4af37] transition-colors">Home</Link>
+          <Link href="/#about" onClick={() => setIsMenuOpen(false)} className="text-xl uppercase tracking-widest font-bold text-[#f5f5f0] hover:text-[#d4af37] transition-colors">About Us</Link>
+          <Link href="/collections" onClick={() => setIsMenuOpen(false)} className="text-xl uppercase tracking-widest font-bold text-[#d4af37] transition-colors">Collections</Link>
+          <Link
+            href="/login"
+            onClick={() => setIsMenuOpen(false)}
+            className="mt-8 text-sm uppercase tracking-widest font-bold border border-[#d4af37]/50 bg-black/30 backdrop-blur-md hover:bg-[#d4af37]/10 text-[#f5f5f0] hover:text-[#d4af37] px-8 py-3 rounded-lg transition-all shadow-lg"
+          >
+            Access Portal
+          </Link>
+        </div>
+      )}
 
       {/* Grid Content */}
       <section className="flex-1 w-full max-w-7xl mx-auto px-8 py-32 flex flex-col gap-12">
