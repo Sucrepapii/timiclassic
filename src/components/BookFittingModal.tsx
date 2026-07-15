@@ -96,7 +96,7 @@ export default function BookFittingModal({ isOpen, onClose, dressName }: BookFit
                 type="submit" 
                 className="w-full bg-[#d4af37] text-black font-bold uppercase tracking-widest text-xs py-3 px-6 hover:bg-[#b08d2c] transition-colors flex items-center justify-center gap-2"
               >
-                Continue to WhatsApp
+                Continue
               </button>
             </div>
           </form>
