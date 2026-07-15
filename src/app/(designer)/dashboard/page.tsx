@@ -59,10 +59,7 @@ export default function DashboardPage() {
   const [clientForm, setClientForm] = useState({ firstName: '', lastName: '', email: '', phone: '', address: '', notes: '', portalPassword: '' });
   const [orderForm, setOrderForm] = useState({ clientId: '', totalAmount: '', depositPaid: '', dueDate: '', notes: '', garments: [{ name: '', description: '', fabricType: '', color: '' }] });
   const [taskForm, setTaskForm] = useState({ title: '', description: '', priority: 'MEDIUM', orderId: '', dueDate: '' });
-  const [staffForm, setStaffForm] = useState({ name: '', email: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
-  const [staffList, setStaffList] = useState<any[]>([]);
 
   const isAdmin = (session?.user as any)?.role === 'ADMIN';
   const isStaff = (session?.user as any)?.role === 'STAFF';
@@ -120,46 +117,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleCreateStaff = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      const res = await fetch('/api/staff', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(staffForm),
-      });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'Failed to create staff account');
-      }
-      toast.success('Staff account created! They will be forced to change password on login.');
-      setStaffForm({ name: '', email: '', password: '' });
-      fetchStaffList();
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
-  const fetchStaffList = async () => {
-    try {
-      const res = await fetch('/api/staff');
-      if (res.ok) {
-        const data = await res.json();
-        setStaffList(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    if (isAdmin && isStaffModalOpen) {
-      fetchStaffList();
-    }
-  }, [isAdmin, isStaffModalOpen]);
 
   const handleCreateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -276,12 +234,12 @@ export default function DashboardPage() {
             </>
           )}
           {isAdmin && (
-            <button
-              onClick={() => setIsStaffModalOpen(true)}
+            <Link
+              href="/staff"
               className="flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase border border-[#d4af37] text-[#d4af37] px-4 py-2.5 rounded-lg hover:bg-[#d4af37]/5 transition-all cursor-pointer"
             >
               <Users className="w-4 h-4" /> Manage Team
-            </button>
+            </Link>
           )}
         </div>
       </div>
@@ -664,54 +622,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* OVERLAY MODAL: TEAM MANAGEMENT */}
-      {isAdmin && isStaffModalOpen && (
-        <div className="fixed inset-0 bg-[#050505]/85 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="w-full max-w-2xl bg-[#111] border border-[#1f1b12] rounded-xl p-6 relative max-h-[90vh] overflow-y-auto flex flex-col md:flex-row gap-8">
-            <button onClick={() => setIsStaffModalOpen(false)} className="absolute top-4 right-4 text-[#8e8e88] hover:text-[#f5f5f0] cursor-pointer">
-              <X className="w-5 h-5" />
-            </button>
-            
-            <div className="flex-1 space-y-4 text-xs border-r border-[#1f1b12]/50 pr-6">
-              <h3 className="text-lg font-serif text-[#f5f5f0] mb-4 uppercase tracking-widest border-b border-[#1f1b12] pb-2">Add Staff Member</h3>
-              <form onSubmit={handleCreateStaff} className="space-y-4">
-                <div>
-                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Full Name</label>
-                  <input type="text" required value={staffForm.name} onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} className="w-full luxury-input" />
-                </div>
-                <div>
-                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Email</label>
-                  <input type="email" required value={staffForm.email} onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })} className="w-full luxury-input" />
-                </div>
-                <div>
-                  <label className="block text-[10px] uppercase text-[#8e8e88] mb-1">Initial Password</label>
-                  <input type="text" required value={staffForm.password} onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })} className="w-full luxury-input" placeholder="They will be forced to change this" />
-                </div>
-                <button type="submit" disabled={isSubmitting} className="w-full luxury-btn-primary uppercase tracking-widest py-3 mt-2 disabled:opacity-50">
-                  {isSubmitting ? 'Creating...' : 'Create Staff Account'}
-                </button>
-              </form>
-            </div>
-
-            <div className="flex-1 space-y-4 text-xs">
-              <h3 className="text-lg font-serif text-[#f5f5f0] mb-4 uppercase tracking-widest border-b border-[#1f1b12] pb-2">Active Staff</h3>
-              {staffList.length === 0 ? (
-                <p className="text-xs text-[#8e8e88] italic">No staff members found.</p>
-              ) : (
-                <div className="space-y-3">
-                  {staffList.map((staff) => (
-                    <div key={staff.id} className="border border-[#1f1b12] p-3 rounded bg-[#161616]">
-                      <p className="text-[#f5f5f0] font-semibold uppercase tracking-wider">{staff.name}</p>
-                      <p className="text-[#8e8e88] font-mono mt-1">{staff.email}</p>
-                      <p className="text-[#d4af37] text-[9px] uppercase tracking-widest mt-2">Added: {new Date(staff.createdAt).toLocaleDateString()}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

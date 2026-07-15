@@ -14,6 +14,7 @@ model User {
   email         String    @unique
   password      String?   // Hashed password
   needsPasswordChange Boolean @default(false) // Admin is false, Staff is true by default
+  isActive      Boolean   @default(true)
   image         String?
   role          Role      @default(USER)
   clients       Client[]

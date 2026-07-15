@@ -108,42 +108,29 @@ export async function POST(req: Request) {
 
     // If type is email and direction is outbound, attempt to send via Resend
     if (type === 'EMAIL' && direction === 'OUTBOUND' && client.email) {
-      const resendApiKey = process.env.RESEND_API_KEY;
-      if (resendApiKey) {
-        try {
-          const res = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${resendApiKey}`,
-            },
-            body: JSON.stringify({
-              from: 'Timiclassic Command <designer@timiclassic.com>', // User can replace this domain later
-              to: client.email,
-              subject: subject || 'Update regarding your Timiclassic Order',
-              html: `<div style="font-family: serif; color: #2d2d2d; padding: 20px; background-color: #fbfaf7;">
-                <h2 style="color: #000; border-bottom: 2px solid #d4af37; padding-bottom: 10px;">TIMICLASSIC</h2>
-                <p style="white-space: pre-wrap; font-size: 14px; line-height: 1.6;">${content}</p>
-                <hr style="border: 0; border-top: 1px solid #e5e5e5; margin-top: 30px;" />
-                <p style="font-size: 11px; color: #8e8e88; text-transform: uppercase; tracking-widest: 1px;">Timiclassic Fashion Designer Command Center</p>
-              </div>`,
-            }),
-          });
+      const { sendEmail } = await import('@/lib/resend');
+      try {
+        const emailResult = await sendEmail({
+          to: client.email,
+          subject: subject || 'Update regarding your Timiclassic Order',
+          html: `<div style="font-family: serif; color: #2d2d2d; padding: 20px; background-color: #fbfaf7;">
+            <h2 style="color: #000; border-bottom: 2px solid #d4af37; padding-bottom: 10px;">TIMICLASSIC</h2>
+            <p style="white-space: pre-wrap; font-size: 14px; line-height: 1.6;">${content}</p>
+            <hr style="border: 0; border-top: 1px solid #e5e5e5; margin-top: 30px;" />
+            <p style="font-size: 11px; color: #8e8e88; text-transform: uppercase; letter-spacing: 1px;">Timiclassic Fashion Designer Command Center</p>
+          </div>`,
+        });
 
-          if (res.ok) {
-            const data = await res.json();
-            externalId = data.id;
-            sendStatus = 'Sent via Resend';
-          } else {
-            console.error('Failed to send email via Resend API response code:', res.status);
-            sendStatus = 'Resend API failed, logged locally';
-          }
-        } catch (mailError) {
-          console.error('Resend service request error:', mailError);
-          sendStatus = 'Resend connection error, logged locally';
+        if (emailResult.success) {
+          externalId = emailResult.data?.id;
+          sendStatus = 'Sent via Resend';
+        } else {
+          console.error('Failed to send email via Resend API response:', emailResult.error);
+          sendStatus = 'Resend API failed, logged locally';
         }
-      } else {
-        sendStatus = 'Simulation Mode: Email log recorded (No Resend API Key)';
+      } catch (mailError) {
+        console.error('Resend service request error:', mailError);
+        sendStatus = 'Resend connection error, logged locally';
       }
     }
 

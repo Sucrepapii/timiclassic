@@ -17,6 +17,7 @@ export async function GET() {
         id: true,
         name: true,
         email: true,
+        isActive: true,
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
@@ -56,6 +57,21 @@ export async function POST(req: Request) {
         role: 'STAFF',
         needsPasswordChange: true,
       },
+    });
+
+    const { sendEmail } = await import('@/lib/resend');
+    await sendEmail({
+      to: email,
+      subject: 'Welcome to Timiclassic Command Center',
+      html: `<div style="font-family: serif; color: #2d2d2d; padding: 20px; background-color: #fbfaf7;">
+        <h2 style="color: #000; border-bottom: 2px solid #d4af37; padding-bottom: 10px;">TIMICLASSIC</h2>
+        <p style="font-size: 14px; line-height: 1.6;">Hello ${name},</p>
+        <p style="font-size: 14px; line-height: 1.6;">An administrator has created a staff account for you on the Timiclassic Command Center.</p>
+        <p style="font-size: 14px; line-height: 1.6;">Your temporary password is: <strong>${password}</strong></p>
+        <p style="font-size: 14px; line-height: 1.6;">Please log in to the portal. You will be required to change your password immediately upon your first login.</p>
+        <hr style="border: 0; border-top: 1px solid #e5e5e5; margin-top: 30px;" />
+        <p style="font-size: 11px; color: #8e8e88; text-transform: uppercase; letter-spacing: 1px;">Timiclassic Fashion Designer Command Center</p>
+      </div>`,
     });
 
     return NextResponse.json({ success: true, user: { id: newStaff.id, name: newStaff.name, email: newStaff.email } });

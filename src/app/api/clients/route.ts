@@ -127,6 +127,28 @@ export async function POST(req: Request) {
     });
 
     // Return the auto-generated password just this once so the admin can share it
+    if (emailKey) {
+      const { sendEmail } = await import('@/lib/resend');
+      const passToSend = portalPassword || rawTempPassword;
+      try {
+        await sendEmail({
+          to: emailKey,
+          subject: 'Welcome to Timiclassic Client Portal',
+          html: `<div style="font-family: serif; color: #2d2d2d; padding: 20px; background-color: #fbfaf7;">
+            <h2 style="color: #000; border-bottom: 2px solid #d4af37; padding-bottom: 10px;">TIMICLASSIC</h2>
+            <p style="font-size: 14px; line-height: 1.6;">Hello ${firstName},</p>
+            <p style="font-size: 14px; line-height: 1.6;">A client portal account has been created for you.</p>
+            <p style="font-size: 14px; line-height: 1.6;">Your temporary password is: <strong>${passToSend}</strong></p>
+            <p style="font-size: 14px; line-height: 1.6;">Please log in to track your orders and measurements. You will be required to change your password immediately upon your first login.</p>
+            <hr style="border: 0; border-top: 1px solid #e5e5e5; margin-top: 30px;" />
+            <p style="font-size: 11px; color: #8e8e88; text-transform: uppercase; letter-spacing: 1px;">Timiclassic Fashion Designer</p>
+          </div>`,
+        });
+      } catch (e) {
+        console.error('Failed to send welcome email', e);
+      }
+    }
+
     return NextResponse.json({ 
       ...newClient, 
       tempPassword: rawTempPassword 

@@ -119,13 +119,43 @@ export async function PUT(
     if (status && status !== existingOrder.status) {
       // Notify client of status change
       const niceStatus = status.replace('_', ' ');
+      const content = `Automated Update: Your order ${existingOrder.orderNumber} has progressed to the ${niceStatus} phase.`;
+
+      let logType = 'NOTE';
+      let logStatus = '';
+
+      if (existingOrder.client.email) {
+        const { sendEmail } = await import('@/lib/resend');
+        try {
+          const emailResult = await sendEmail({
+            to: existingOrder.client.email,
+            subject: `Order Update: ${existingOrder.orderNumber}`,
+            html: `<div style="font-family: serif; color: #2d2d2d; padding: 20px; background-color: #fbfaf7;">
+              <h2 style="color: #000; border-bottom: 2px solid #d4af37; padding-bottom: 10px;">TIMICLASSIC</h2>
+              <p style="white-space: pre-wrap; font-size: 14px; line-height: 1.6;">${content}</p>
+              <hr style="border: 0; border-top: 1px solid #e5e5e5; margin-top: 30px;" />
+              <p style="font-size: 11px; color: #8e8e88; text-transform: uppercase; letter-spacing: 1px;">Timiclassic Fashion Designer Command Center</p>
+            </div>`,
+          });
+
+          if (emailResult.success) {
+            logType = 'EMAIL';
+            logStatus = '\n\n[Status: Sent via Resend]';
+          } else {
+            logStatus = '\n\n[Status: Resend API failed, logged locally]';
+          }
+        } catch (error) {
+          logStatus = '\n\n[Status: Resend connection error, logged locally]';
+        }
+      }
+
       await prisma.communication.create({
         data: {
           clientId: existingOrder.clientId,
           orderId: existingOrder.id,
-          type: 'NOTE',
+          type: logType as any,
           direction: 'OUTBOUND',
-          content: `Automated Update: Your order ${existingOrder.orderNumber} has progressed to the ${niceStatus} phase.`,
+          content: content + logStatus,
         }
       });
     }
