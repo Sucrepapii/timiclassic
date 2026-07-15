@@ -88,7 +88,7 @@ export default function CollectionsPage() {
       <section className="flex-1 w-full max-w-7xl mx-auto px-8 py-32 flex flex-col gap-12">
         <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-1.5 bg-[#111] border border-[#1f1b12] px-3.5 py-1.5 rounded-full text-[10px] tracking-widest uppercase text-[#d4af37] font-bold">
-            <Sparkles className="w-3.5 h-3.5" /> 2026 Season
+            <Sparkles className="w-3.5 h-3.5" /> Couture Series
           </div>
           <h2 className="text-4xl md:text-5xl font-serif tracking-wide leading-tight text-[#d4af37]">
             Couture Masterpieces
@@ -156,9 +156,9 @@ export default function CollectionsPage() {
 
       {/* Footer */}
       <footer className="w-full border-t border-[#1f1b12]/40 py-8 text-center flex flex-col items-center gap-2 text-[10px] text-[#8e8e88] uppercase tracking-wider font-semibold bg-[#050505]">
-        <p>© 2026 Timiclassic Bespoke Clothing. All Rights Reserved.</p>
+        <p>© {new Date().getFullYear()} Timiclassic Bespoke Clothing. All Rights Reserved.</p>
         <p className="flex items-center justify-center gap-1 mt-2">
-          <Sparkles className="w-3 h-3 text-[#d4af37]" /> Built with Couture Integrity
+          <Sparkles className="w-3 h-3 text-[#d4af37]" /> Elegance in Every Thread
         </p>
       </footer>
     </main>
