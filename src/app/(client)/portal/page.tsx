@@ -15,7 +15,9 @@ import {
   AlertCircle,
   FileText,
   Clock,
-  Bell
+  Bell,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/components/billing/InvoicePDF';
@@ -47,6 +49,7 @@ interface Communication {
   id: string;
   type: string;
   direction: string;
+  subject: string | null;
   content: string;
   createdAt: string;
 }
@@ -90,6 +93,15 @@ export default function ClientPortalPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [expandedLogs, setExpandedLogs] = useState<Record<string, boolean>>({});
+
+  const toggleLogExpand = (id: string) => {
+    setExpandedLogs((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
   // Send request message state
   const [comment, setComment] = useState('');
@@ -342,15 +354,46 @@ export default function ClientPortalPage() {
               <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                 {profile.communications
                   .filter((c) => c.direction === 'OUTBOUND')
-                  .map((msg) => (
-                    <div key={msg.id} className="bg-[#111] p-3 rounded-lg border border-[#1f1b12] text-xs">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="font-semibold text-[#f5f5f0] uppercase tracking-wider text-[10px]">TimiClassic Studio</span>
-                        <span className="text-[#8e8e88] text-[9px] font-mono">{new Date(msg.createdAt).toLocaleString()}</span>
+                  .map((msg) => {
+                    const isExpanded = !!expandedLogs[msg.id];
+                    return (
+                      <div 
+                        key={msg.id} 
+                        onClick={!isExpanded ? () => toggleLogExpand(msg.id) : undefined}
+                        className={`bg-[#111] border border-[#1f1b12] text-xs rounded-lg overflow-hidden transition-all duration-200 ${!isExpanded ? 'cursor-pointer hover:bg-[#1f1f1f]/50' : ''}`}
+                      >
+                        {/* Header */}
+                        <div 
+                          onClick={isExpanded ? () => toggleLogExpand(msg.id) : undefined}
+                          className={`p-3 flex justify-between items-center select-none ${isExpanded ? 'cursor-pointer hover:bg-[#1f1f1f]/50' : ''}`}
+                        >
+                          <span className="font-semibold text-[#f5f5f0] uppercase tracking-wider text-[10px]">TimiClassic Studio</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[#8e8e88] text-[9px] font-mono">{new Date(msg.createdAt).toLocaleString()}</span>
+                            {isExpanded ? (
+                              <ChevronUp className="w-3.5 h-3.5 text-[#8e8e88]" />
+                            ) : (
+                              <ChevronDown className="w-3.5 h-3.5 text-[#8e8e88]" />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Content Body */}
+                        {isExpanded ? (
+                          <div className="px-3 pb-3 border-t border-[#1f1b12]/30 pt-2">
+                            {msg.subject && (
+                              <p className="text-[10px] text-[#d4af37] font-semibold mb-1">Subject: {msg.subject}</p>
+                            )}
+                            <p className="text-[#8e8e88] leading-relaxed whitespace-pre-wrap italic">{msg.content}</p>
+                          </div>
+                        ) : (
+                          <div className="px-3 pb-2 text-[10px] text-[#8e8e88]/60 truncate italic">
+                            {msg.subject ? `Subject: ${msg.subject} • ` : ''}{msg.content}
+                          </div>
+                        )}
                       </div>
-                      <p className="text-[#8e8e88] leading-relaxed">{msg.content}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
             )}
           </div>
