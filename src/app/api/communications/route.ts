@@ -103,7 +103,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Client profile not found' }, { status: 404 });
     }
 
-    let externalId = null;
+    let externalId: string | null = null;
     let sendStatus = 'Logged locally';
 
     // If type is email and direction is outbound, attempt to send via Resend
@@ -122,7 +122,7 @@ export async function POST(req: Request) {
         });
 
         if (emailResult.success) {
-          externalId = emailResult.data?.id;
+          externalId = emailResult.data?.data?.id || null;
           sendStatus = 'Sent via Resend';
         } else {
           console.error('Failed to send email via Resend API response:', emailResult.error);

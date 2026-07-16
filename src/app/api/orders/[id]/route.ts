@@ -63,7 +63,7 @@ export async function PUT(
 
     const existingOrder = await prisma.order.findUnique({
       where: { id: params.id },
-      include: { garments: true },
+      include: { garments: true, client: true },
     });
 
     if (!existingOrder) {
