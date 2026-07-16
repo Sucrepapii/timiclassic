@@ -12,7 +12,9 @@ import {
   Calendar,
   Sparkles,
   Inbox,
-  AlertCircle
+  AlertCircle,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -67,6 +69,16 @@ export default function CommunicationsHub() {
   const isStaff = (session?.user as any)?.role === 'STAFF';
   
   const [activeTab, setActiveTab] = useState<'CLIENT' | 'INTERNAL'>(isStaff ? 'INTERNAL' : 'CLIENT');
+  const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
+  const [isInternalHistoryCollapsed, setIsInternalHistoryCollapsed] = useState(false);
+  const [expandedLogs, setExpandedLogs] = useState<Record<string, boolean>>({});
+
+  const toggleLogExpand = (id: string) => {
+    setExpandedLogs((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
   
   const [comms, setComms] = useState<CommLog[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -240,11 +252,29 @@ export default function CommunicationsHub() {
 
   return (
     <div className="space-y-6 h-full flex flex-col">
-      <div>
-        <h1 className="text-3xl font-serif text-[#f5f5f0] tracking-wide">Communication Hub</h1>
-        <p className="text-xs text-[#8e8e88] uppercase tracking-widest mt-1">
-          Coordinate custom updates and collaborate with your team
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-serif text-[#f5f5f0] tracking-wide">Communication Hub</h1>
+          <p className="text-xs text-[#8e8e88] uppercase tracking-widest mt-1">
+            Coordinate custom updates and collaborate with your team
+          </p>
+        </div>
+        {activeTab === 'CLIENT' && !isStaff && (
+          <button
+            onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
+            className="self-start md:self-auto flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-[#d4af37] border border-[#d4af37]/30 hover:bg-[#d4af37]/10 px-3 py-1.5 rounded transition-all cursor-pointer font-sans"
+          >
+            {isHistoryCollapsed ? 'Show Log History' : 'Hide Log History'}
+          </button>
+        )}
+        {activeTab === 'INTERNAL' && (
+          <button
+            onClick={() => setIsInternalHistoryCollapsed(!isInternalHistoryCollapsed)}
+            className="self-start md:self-auto flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-[#d4af37] border border-[#d4af37]/30 hover:bg-[#d4af37]/10 px-3 py-1.5 rounded transition-all cursor-pointer font-sans"
+          >
+            {isInternalHistoryCollapsed ? 'Show Chat History' : 'Hide Chat History'}
+          </button>
+        )}
       </div>
 
       <div className="flex items-center gap-4 border-b border-[#1f1b12] pb-2">
@@ -267,7 +297,7 @@ export default function CommunicationsHub() {
       {(!isStaff && activeTab === 'CLIENT') ? (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[500px]">
         {/* Left column: compose form */}
-        <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 h-[550px] overflow-y-auto">
+        <div className={`bg-[#111] border border-[#1f1b12] rounded-xl p-6 h-[550px] overflow-y-auto transition-all duration-300 ${isHistoryCollapsed ? 'lg:col-span-3' : 'lg:col-span-1'}`}>
           <h3 className="text-xs uppercase tracking-widest font-bold text-[#d4af37] border-b border-[#1f1b12]/50 pb-2 mb-4">
             Compose Message
           </h3>
@@ -357,46 +387,84 @@ export default function CommunicationsHub() {
         </div>
 
         {/* Right pane: list log history */}
-        <div className="lg:col-span-2 bg-[#111] border border-[#1f1b12] rounded-xl p-6 h-[550px] overflow-y-auto">
-          <h3 className="text-xs uppercase tracking-widest font-bold text-[#d4af37] border-b border-[#1f1b12]/50 pb-2 mb-4">
-            Recent Communications Log
-          </h3>
-
-          {loading ? (
-            <div className="text-center py-12 text-xs text-[#8e8e88] uppercase tracking-widest animate-pulse">Loading histories...</div>
-          ) : comms.length === 0 ? (
-            <div className="text-center py-12 text-xs text-[#8e8e88] italic">No communication logs recorded.</div>
-          ) : (
-            <div className="space-y-4">
-              {comms.map((comm) => (
-                <div key={comm.id} className="border border-[#1f1b12]/60 rounded-lg p-4 bg-[#161616] space-y-2 text-xs">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2">
-                      {getTypeIcon(comm.type)}
-                      <span className="font-semibold uppercase tracking-wider text-[#f5f5f0]">
-                        {comm.type} Log to {comm.client.firstName} {comm.client.lastName}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-[#8e8e88] font-mono">
-                      {new Date(comm.createdAt).toLocaleString()}
-                    </span>
-                  </div>
-                  {comm.subject && (
-                    <p className="text-[11px] text-[#d4af37] font-semibold">Subject: {comm.subject}</p>
-                  )}
-                  <p className="text-[#8e8e88] leading-relaxed whitespace-pre-wrap pl-6 italic">
-                    {comm.content}
-                  </p>
-                </div>
-              ))}
+        {!isHistoryCollapsed && (
+          <div className="lg:col-span-2 bg-[#111] border border-[#1f1b12] rounded-xl p-6 h-[550px] overflow-y-auto transition-all duration-300">
+            <div className="flex justify-between items-center border-b border-[#1f1b12]/50 pb-2 mb-4">
+              <h3 className="text-xs uppercase tracking-widest font-bold text-[#d4af37]">
+                Recent Communications Log
+              </h3>
+              <button
+                onClick={() => setIsHistoryCollapsed(true)}
+                className="text-[10px] uppercase font-bold tracking-widest text-[#8e8e88] hover:text-[#f5f5f0] transition-colors cursor-pointer font-sans"
+              >
+                Hide
+              </button>
             </div>
-          )}
-        </div>
+
+            {loading ? (
+              <div className="text-center py-12 text-xs text-[#8e8e88] uppercase tracking-widest animate-pulse">Loading histories...</div>
+            ) : comms.length === 0 ? (
+              <div className="text-center py-12 text-xs text-[#8e8e88] italic">No communication logs recorded.</div>
+            ) : (
+              <div className="space-y-3">
+                {comms.map((comm) => {
+                  const isExpanded = !!expandedLogs[comm.id];
+                  return (
+                    <div 
+                      key={comm.id} 
+                      onClick={!isExpanded ? () => toggleLogExpand(comm.id) : undefined}
+                      className={`border border-[#1f1b12]/60 rounded-lg bg-[#161616] text-xs transition-all overflow-hidden ${!isExpanded ? 'cursor-pointer hover:bg-[#1f1f1f]/50' : ''}`}
+                    >
+                      {/* Log Header */}
+                      <div 
+                        onClick={isExpanded ? () => toggleLogExpand(comm.id) : undefined}
+                        className={`p-4 flex justify-between items-start select-none ${isExpanded ? 'cursor-pointer hover:bg-[#1f1f1f]/50' : ''}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          {getTypeIcon(comm.type)}
+                          <span className="font-semibold uppercase tracking-wider text-[#f5f5f0]">
+                            {comm.type} Log to {comm.client.firstName} {comm.client.lastName}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-[10px] text-[#8e8e88] font-mono">
+                            {new Date(comm.createdAt).toLocaleString()}
+                          </span>
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4 text-[#8e8e88]" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-[#8e8e88]" />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Log Body */}
+                      {isExpanded ? (
+                        <div className="px-4 pb-4 border-t border-[#1f1b12]/30 pt-3 space-y-2">
+                          {comm.subject && (
+                            <p className="text-[11px] text-[#d4af37] font-semibold">Subject: {comm.subject}</p>
+                          )}
+                          <p className="text-[#8e8e88] leading-relaxed whitespace-pre-wrap pl-6 italic">
+                            {comm.content}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="px-4 pb-3 pl-10 text-[10px] text-[#8e8e88]/60 truncate italic max-w-full">
+                          {comm.subject ? `Subject: ${comm.subject} • ` : ''}{comm.content}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       ) : (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[500px]">
         {/* Left: Chat list / Compose */}
-        <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 h-[550px] flex flex-col">
+        <div className={`bg-[#111] border border-[#1f1b12] rounded-xl p-6 h-[550px] flex flex-col transition-all duration-300 ${isInternalHistoryCollapsed ? 'lg:col-span-3' : 'lg:col-span-1'}`}>
           <h3 className="text-xs uppercase tracking-widest font-bold text-[#d4af37] border-b border-[#1f1b12]/50 pb-2 mb-4 shrink-0">
             Select Team Member
           </h3>
@@ -443,35 +511,45 @@ export default function CommunicationsHub() {
         </div>
 
         {/* Right: Chat History */}
-        <div className="lg:col-span-2 bg-[#111] border border-[#1f1b12] rounded-xl p-6 h-[550px] flex flex-col space-y-4">
-          <h3 className="text-xs uppercase tracking-widest font-bold text-[#d4af37] border-b border-[#1f1b12]/50 pb-2 shrink-0">
-            Chat History
-          </h3>
-          
-          {!selectedPeerId ? (
-             <div className="flex-1 flex items-center justify-center text-xs text-[#8e8e88] italic">Select a team member to view chat history.</div>
-          ) : loadingInternal ? (
-             <div className="flex-1 flex items-center justify-center text-xs text-[#8e8e88] animate-pulse">Loading messages...</div>
-          ) : internalMessages.length === 0 ? (
-             <div className="flex-1 flex items-center justify-center text-xs text-[#8e8e88] italic">No messages yet. Say hello!</div>
-          ) : (
-            <div className="flex-1 space-y-4 overflow-y-auto pr-2 pb-4">
-              {internalMessages.map((msg) => {
-                const isMine = msg.senderId === myId;
-                return (
-                  <div key={msg.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} gap-1 text-xs`}>
-                    <span className="text-[9px] uppercase tracking-widest text-[#8e8e88] px-1">
-                      {isMine ? 'You' : msg.sender.name} • {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                    </span>
-                    <div className={`p-3 rounded-xl max-w-[80%] ${isMine ? 'bg-[#d4af37]/10 border border-[#d4af37]/30 text-[#f5f5f0]' : 'bg-[#161616] border border-[#1f1b12] text-[#8e8e88]'}`}>
-                      {msg.content}
-                    </div>
-                  </div>
-                )
-              })}
+        {!isInternalHistoryCollapsed && (
+          <div className="lg:col-span-2 bg-[#111] border border-[#1f1b12] rounded-xl p-6 h-[550px] flex flex-col space-y-4 transition-all duration-300">
+            <div className="flex justify-between items-center border-b border-[#1f1b12]/50 pb-2 shrink-0">
+              <h3 className="text-xs uppercase tracking-widest font-bold text-[#d4af37]">
+                Chat History
+              </h3>
+              <button
+                onClick={() => setIsInternalHistoryCollapsed(true)}
+                className="text-[10px] uppercase font-bold tracking-widest text-[#8e8e88] hover:text-[#f5f5f0] transition-colors cursor-pointer font-sans"
+              >
+                Hide
+              </button>
             </div>
-          )}
-        </div>
+            
+            {!selectedPeerId ? (
+               <div className="flex-1 flex items-center justify-center text-xs text-[#8e8e88] italic">Select a team member to view chat history.</div>
+            ) : loadingInternal ? (
+               <div className="flex-1 flex items-center justify-center text-xs text-[#8e8e88] animate-pulse">Loading messages...</div>
+            ) : internalMessages.length === 0 ? (
+               <div className="flex-1 flex items-center justify-center text-xs text-[#8e8e88] italic">No messages yet. Say hello!</div>
+            ) : (
+              <div className="flex-1 space-y-4 overflow-y-auto pr-2 pb-4">
+                {internalMessages.map((msg) => {
+                  const isMine = msg.senderId === myId;
+                  return (
+                    <div key={msg.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} gap-1 text-xs`}>
+                      <span className="text-[9px] uppercase tracking-widest text-[#8e8e88] px-1">
+                        {isMine ? 'You' : msg.sender.name} • {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </span>
+                      <div className={`p-3 rounded-xl max-w-[80%] ${isMine ? 'bg-[#d4af37]/10 border border-[#d4af37]/30 text-[#f5f5f0]' : 'bg-[#161616] border border-[#1f1b12] text-[#8e8e88]'}`}>
+                        {msg.content}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       )}
     </div>
