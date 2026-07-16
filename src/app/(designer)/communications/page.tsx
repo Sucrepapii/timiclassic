@@ -39,7 +39,7 @@ const TEMPLATES = [
     id: 'deposit',
     name: 'Deposit Payment Request',
     subject: 'Deposit Invoice: Starting Work on Your Custom Order',
-    body: (clientName: string) => `Dear ${clientName},\n\nWe are excited to begin crafting your bespoke garment! To initiate fabric sourcing and pattern draping, we require a 50% deposit.\n\nYou can log into your Client Portal to download the invoice and check the details. Please let us know once the payment has been arranged.\n\nWarmest regards,\nTimi Classic Bespoke`
+    body: (clientName: string) => `Dear ${clientName},\n\nWe are excited to begin crafting your bespoke garment! To initiate fabric sourcing and pattern draping, we require a 80% deposit.\n\nYou can log into your Client Portal to download the invoice and check the details. Please let us know once the payment has been arranged.\n\nWarmest regards,\nTimi Classic Bespoke`
   },
   {
     id: 'fitting',

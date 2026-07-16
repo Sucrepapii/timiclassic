@@ -1,7 +1,45 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { SessionProvider } from 'next-auth/react';
+import { SessionProvider, useSession, signOut } from 'next-auth/react';
+
+function InactivityAutoSignout() {
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (!session) return;
+
+    let timeoutId: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        signOut({ callbackUrl: '/login' });
+      }, 5 * 60 * 1000); // 5 minutes inactivity
+    };
+
+    // Events to monitor for activity
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+
+    // Initialize timer
+    resetTimer();
+
+    // Add event listeners
+    events.forEach((event) => {
+      window.addEventListener(event, resetTimer);
+    });
+
+    // Cleanup
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach((event) => {
+        window.removeEventListener(event, resetTimer);
+      });
+    };
+  }, [session]);
+
+  return null;
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -21,5 +59,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  return <SessionProvider>{children}</SessionProvider>;
+  return (
+    <SessionProvider>
+      <InactivityAutoSignout />
+      {children}
+    </SessionProvider>
+  );
 }
