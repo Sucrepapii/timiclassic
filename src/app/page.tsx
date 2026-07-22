@@ -134,9 +134,12 @@ export default function LandingPage() {
           <p className="text-sm text-[#8e8e88] leading-relaxed max-w-md">
             Our atelier merges traditional bespoke craftsmanship with modern operational efficiency, ensuring that your garments are not just beautifully made, but perfectly orchestrated.
           </p>
-          <button className="uppercase tracking-widest text-xs font-bold border-b border-[#d4af37] text-[#d4af37] pb-1 hover:text-[#f5f5f0] hover:border-[#f5f5f0] transition-all">
+          <Link 
+            href="/about" 
+            className="inline-block uppercase tracking-widest text-xs font-bold border-b border-[#d4af37] text-[#d4af37] pb-1 hover:text-[#f5f5f0] hover:border-[#f5f5f0] transition-all"
+          >
             Read Our Story
-          </button>
+          </Link>
         </div>
         <div className="flex-1">
           <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-[#1f1b12] shadow-2xl">
