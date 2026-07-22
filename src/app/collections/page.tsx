@@ -98,7 +98,7 @@ export default function CollectionsPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 max-w-7xl mx-auto px-2 md:px-8 relative z-10">
           {allSlides.map((slide) => (
             <div key={slide.id} className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-[#1f1b12] shadow-2xl bg-[#111]">
               <img 
@@ -108,27 +108,27 @@ export default function CollectionsPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
               
-              <div className="absolute bottom-0 left-0 w-full p-8 flex flex-col justify-end">
-                <div className="text-[#d4af37] font-bold tracking-widest text-xs uppercase mb-1">
+              <div className="absolute bottom-0 left-0 w-full p-4 sm:p-8 flex flex-col justify-end">
+                <div className="text-[#d4af37] font-bold tracking-widest text-[9px] sm:text-xs uppercase mb-1">
                   {slide.title}
                 </div>
-                <div className="text-3xl font-serif font-bold text-[#f5f5f0] mb-3 uppercase shadow-md">
+                <div className="text-base sm:text-3xl font-serif font-bold text-[#f5f5f0] mb-1 sm:mb-3 uppercase shadow-md truncate">
                   {slide.name}
                 </div>
-                <div className="text-sm text-gray-300 leading-relaxed max-w-md">
+                <div className="text-[10px] sm:text-sm text-gray-300 leading-normal sm:leading-relaxed max-w-md line-clamp-2 sm:line-clamp-none">
                   {slide.description}
                 </div>
                 
-                <div className="mt-6 flex flex-col sm:flex-row gap-4 opacity-100 transform translate-y-0 md:opacity-0 md:translate-y-4 transition-all duration-500 md:group-hover:opacity-100 md:group-hover:translate-y-0">
+                <div className="mt-3 sm:mt-6 flex flex-col sm:flex-row gap-2 sm:gap-4 opacity-100 transform translate-y-0 md:opacity-0 md:translate-y-4 transition-all duration-500 md:group-hover:opacity-100 md:group-hover:translate-y-0">
                   <button 
                     onClick={() => openViewDetails(slide)}
-                    className="w-full sm:w-auto px-6 py-3 sm:py-2 border border-[#d4af37] bg-[#d4af37] text-black text-xs font-bold uppercase tracking-widest hover:bg-transparent hover:text-[#d4af37] transition-colors rounded"
+                    className="w-full sm:w-auto px-3 py-2 sm:px-6 sm:py-2 border border-[#d4af37] bg-[#d4af37] text-black text-[9px] sm:text-xs font-bold uppercase tracking-widest hover:bg-transparent hover:text-[#d4af37] transition-colors rounded"
                   >
                     View Details
                   </button>
                   <button 
                     onClick={() => openBookFitting(slide)}
-                    className="w-full sm:w-auto px-6 py-3 sm:py-2 border border-white/30 text-white text-xs font-bold uppercase tracking-widest hover:border-[#d4af37] hover:text-[#d4af37] transition-colors rounded bg-transparent"
+                    className="w-full sm:w-auto px-3 py-2 sm:px-6 sm:py-2 border border-white/30 text-white text-[9px] sm:text-xs font-bold uppercase tracking-widest hover:border-[#d4af37] hover:text-[#d4af37] transition-colors rounded bg-transparent"
                   >
                     Book Fitting
                   </button>
