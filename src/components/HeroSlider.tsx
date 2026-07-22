@@ -48,6 +48,20 @@ export const initialSlides: SlideItem[] = [
     title: 'SERENITY',
     name: 'OCEAN SERENADE',
     description: 'A breathtaking lace gown embellished with pearls, perfectly contrasting with the natural coastal backdrop for a dramatic statement.'
+  },
+  {
+    id: '17',
+    image: '/dresses/couture-6.jpg',
+    title: 'GARDEN',
+    name: 'GARDEN OF GRACE',
+    description: 'A majestic white satin wedding gown styled against a botanical backdrop. Designed to evoke pure grace, harmony, and timeless bridal majesty.'
+  },
+  {
+    id: '18',
+    image: '/dresses/couture-7.jpg',
+    title: 'HERITAGE',
+    name: 'SAPPHIRE HERITAGE',
+    description: 'A stunning royal blue traditional ensemble featuring modern structural lines and rich texture, paired with a matching headtie for ultimate cultural elegance.'
   }
 ];
 
