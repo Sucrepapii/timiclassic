@@ -109,7 +109,7 @@ export default function AboutPage() {
               <div className="text-[10px] uppercase text-[#8e8e88] tracking-widest font-semibold mt-1">Bespoke Fits</div>
             </div>
             <div>
-              <div className="text-2xl font-serif text-[#d4af37] font-bold">1500+</div>
+              <div className="text-2xl font-serif text-[#d4af37] font-bold">900+</div>
               <div className="text-[10px] uppercase text-[#8e8e88] tracking-widest font-semibold mt-1">Garments Created</div>
             </div>
           </div>
@@ -245,13 +245,20 @@ export default function AboutPage() {
           <p className="text-xs text-[#8e8e88] leading-relaxed max-w-md mx-auto">
             Book an appointment for a personalized fitting, consultation, and see our materials up close.
           </p>
-          <div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/collections"
-              className="inline-flex items-center justify-center text-xs uppercase tracking-widest font-bold border border-[#d4af37] bg-[#d4af37] hover:bg-transparent text-black hover:text-[#d4af37] px-8 py-3.5 rounded transition-all shadow-xl"
+              className="inline-flex items-center justify-center text-xs uppercase tracking-widest font-bold border border-[#d4af37] bg-[#d4af37] hover:bg-transparent text-black hover:text-[#d4af37] px-8 py-3.5 rounded transition-all shadow-xl w-full sm:w-auto"
             >
               Explore Collections
             </Link>
+            <a
+              href="/Timiclassic_Luxury_Portfolio.pdf"
+              download="Timiclassic_Luxury_Portfolio.pdf"
+              className="inline-flex items-center justify-center text-xs uppercase tracking-widest font-bold border border-[#d4af37]/50 hover:border-[#d4af37] bg-transparent hover:bg-[#d4af37]/10 text-[#d4af37] px-8 py-3.5 rounded transition-all shadow-xl w-full sm:w-auto"
+            >
+              Download Portfolio PDF
+            </a>
           </div>
         </div>
       </section>
