@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#050505",
+  themeColor: "#f7f4eb",
 };
 
 export default function RootLayout({
@@ -46,18 +46,18 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body
-        className="h-full bg-[#050505] text-[#f5f5f0] font-sans antialiased selection:bg-[#d4af37]/30 selection:text-[#d4af37]"
+        className="h-full bg-[#f7f4eb] text-[#0d0d0c] font-sans antialiased selection:bg-[#a67c1e]/30 selection:text-[#a67c1e]"
         suppressHydrationWarning
       >
         <AuthProvider>
           <Toaster 
             position="top-center" 
             toastOptions={{
-              className: 'border border-[#1f1b12] bg-[#111] text-[#f5f5f0] text-xs font-semibold tracking-widest uppercase rounded-lg shadow-2xl',
+              className: 'border border-[#d1c9b8] bg-[#111] text-[#0d0d0c] text-xs font-semibold tracking-widest uppercase rounded-lg shadow-2xl',
               style: {
-                background: '#111111',
-                color: '#f5f5f0',
-                border: '1px solid #1f1b12',
+                background: '#fdfcf7',
+                color: '#0d0d0c',
+                border: '1px solid #d1c9b8',
                 borderRadius: '8px',
                 padding: '12px 16px',
               },

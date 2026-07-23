@@ -8,15 +8,15 @@ import {
   Image,
 } from '@react-pdf/renderer';
 
-// Premium Color Palette
+// Premium Beige Color Palette
 const colors = {
-  bgDark: '#050505',
-  bgLight: '#0d0d0c',
-  accentGold: '#d4af37',
-  textLight: '#f5f5f0',
-  textMuted: '#8e8e88',
-  borderGold: '#d4af37',
-  borderDark: '#1f1b12',
+  bgDark: '#f7f4eb',       // Main page background (warm beige)
+  bgLight: '#fdfcf7',      // Card/block background (light cream)
+  accentGold: '#a67c1e',   // Accent gold (darker for readability on light bg)
+  textLight: '#0d0d0c',    // Main dark text
+  textMuted: '#5c564a',    // Muted body text
+  borderGold: '#a67c1e',   // Gold borders
+  borderDark: '#e3ded2',   // Soft light border
 };
 
 const styles = StyleSheet.create({

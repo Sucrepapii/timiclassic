@@ -15,13 +15,13 @@
   --color-gold-800: #573e13;
   --color-gold-900: #3c2a0d;
   
-  --color-luxury-black: #050505;
-  --color-luxury-charcoal: #111111;
-  --color-luxury-panel: #161616;
-  --color-luxury-border: #1f1b12;
-  --color-luxury-gold: #d4af37;
-  --color-luxury-text: #f5f5f0;
-  --color-luxury-muted: #8e8e88;
+  --color-luxury-black: #f7f4eb;       /* Beige background */
+  --color-luxury-charcoal: #fdfcf7;    /* Card light cream background */
+  --color-luxury-panel: #eae5da;       /* Form panels/dropdowns */
+  --color-luxury-border: #d1c9b8;      /* Warm beige borders */
+  --color-luxury-gold: #a67c1e;        /* Darker gold for readability */
+  --color-luxury-text: #0d0d0c;        /* Main dark text */
+  --color-luxury-muted: #5c564a;       /* Warm gray muted text */
 }
 
 /* Custom Scrollbars */
@@ -30,43 +30,43 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #050505;
+  background: #f7f4eb;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1f1b12;
+  background: #d1c9b8;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #d4af37;
+  background: #a67c1e;
 }
 
 /* Custom Luxury Gradients and Classes */
 .gold-gradient {
-  background: linear-gradient(135deg, #f5edcb 0%, #d4af37 50%, #997420 100%);
+  background: linear-gradient(135deg, #f5edcb 0%, #a67c1e 50%, #735212 100%);
 }
 
 .gold-text-gradient {
-  background: linear-gradient(135deg, #f5edcb 0%, #d4af37 50%, #997420 100%);
+  background: linear-gradient(135deg, #f5edcb 0%, #a67c1e 50%, #735212 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .luxury-card {
-  background-color: #111111;
-  border: 1px solid #1f1b12;
+  background-color: #fdfcf7;
+  border: 1px solid #d1c9b8;
   border-radius: 8px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .luxury-card:hover {
-  border-color: rgba(212, 175, 55, 0.4);
-  box-shadow: 0 4px 20px -5px rgba(212, 175, 55, 0.15);
+  border-color: rgba(166, 124, 30, 0.5);
+  box-shadow: 0 4px 20px -5px rgba(166, 124, 30, 0.15);
 }
 
 .luxury-input {
-  background-color: #161616;
-  border: 1px solid #1f1b12;
-  color: #f5f5f0;
+  background-color: #fdfcf7;
+  border: 1px solid #d1c9b8;
+  color: #0d0d0c;
   border-radius: 6px;
   padding: 8px 12px;
   outline: none;
@@ -74,13 +74,13 @@
 }
 
 .luxury-input:focus {
-  border-color: #d4af37;
-  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.3);
+  border-color: #a67c1e;
+  box-shadow: 0 0 0 1px rgba(166, 124, 30, 0.3);
 }
 
 .luxury-btn-primary {
-  background: linear-gradient(135deg, #ebd898 0%, #d4af37 100%);
-  color: #050505;
+  background: linear-gradient(135deg, #ebd898 0%, #a67c1e 100%);
+  color: #fdfcf7;
   font-weight: 600;
   border-radius: 6px;
   padding: 10px 20px;
@@ -91,14 +91,14 @@
 
 .luxury-btn-primary:hover {
   opacity: 0.95;
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 0 15px rgba(166, 124, 30, 0.4);
   transform: translateY(-1px);
 }
 
 .luxury-btn-secondary {
   background: transparent;
-  color: #f5f5f0;
-  border: 1px solid #1f1b12;
+  color: #0d0d0c;
+  border: 1px solid #d1c9b8;
   border-radius: 6px;
   padding: 10px 20px;
   transition: all 0.2s ease-in-out;
@@ -106,13 +106,13 @@
 }
 
 .luxury-btn-secondary:hover {
-  border-color: #d4af37;
-  color: #d4af37;
-  background: rgba(212, 175, 55, 0.05);
+  border-color: #a67c1e;
+  color: #a67c1e;
+  background: rgba(166, 124, 30, 0.05);
 }
 
 .glass-panel {
-  background: rgba(17, 17, 17, 0.7);
+  background: rgba(253, 252, 247, 0.85);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(166, 124, 30, 0.15);
 }
