@@ -122,11 +122,11 @@ export async function POST(req: Request) {
         });
 
         if (emailResult.success) {
-          externalId = emailResult.data?.data?.id || null;
-          sendStatus = 'Sent via Resend';
+          externalId = (emailResult.data as any)?.messageId || null;
+          sendStatus = 'Sent via Nodemailer (Gmail)';
         } else {
-          console.error('Failed to send email via Resend API response:', emailResult.error);
-          sendStatus = 'Resend API failed, logged locally';
+          console.error('Failed to send email via Nodemailer response:', emailResult.error);
+          sendStatus = 'Nodemailer API failed, logged locally';
         }
       } catch (mailError) {
         console.error('Resend service request error:', mailError);
