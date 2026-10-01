@@ -1,16 +1,22 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-// Make sure to add RESEND_API_KEY in your .env file
-const resendApiKey = process.env.RESEND_API_KEY;
+const gmailUser = process.env.GMAIL_USER;
+const gmailPass = process.env.GMAIL_PASS;
 
-export const resend = resendApiKey ? new Resend(resendApiKey) : null;
-
-if (!resendApiKey) {
-  console.warn('RESEND_API_KEY is not defined in the environment variables. Email sending will not work.');
+if (!gmailUser || !gmailPass) {
+  console.warn('GMAIL_USER or GMAIL_PASS is not defined in the environment variables. Email sending will not work.');
 }
 
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: gmailUser,
+    pass: gmailPass,
+  },
+});
+
 /**
- * Utility function to send an email.
+ * Utility function to send an email using Nodemailer (Gmail).
  * @param to recipient email address
  * @param subject email subject
  * @param html email HTML content
@@ -24,22 +30,19 @@ export async function sendEmail({
   subject: string;
   html: string;
 }) {
-  if (!resend) {
-    throw new Error('Resend is not configured. Missing RESEND_API_KEY.');
+  if (!gmailUser || !gmailPass) {
+    throw new Error('Nodemailer is not configured. Missing GMAIL_USER or GMAIL_PASS.');
   }
 
-  // NOTE: You must use a verified domain in Resend if you are not testing.
-  // The default from address usually needs to match your verified domain.
-  // For testing, Resend allows sending from 'onboarding@resend.dev' to the registered email address.
   try {
-    const data = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>', // Replace with your verified domain
+    const info = await transporter.sendMail({
+      from: `"Timiclassic" <${gmailUser}>`,
       to,
       subject,
       html,
     });
 
-    return { success: true, data };
+    return { success: true, data: info };
   } catch (error) {
     console.error('Error sending email:', error);
     return { success: false, error };
