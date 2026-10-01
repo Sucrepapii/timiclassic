@@ -18,7 +18,7 @@ export default function AboutPage() {
           <div className="flex items-center gap-3">
             <img src="/logo.jpg" alt="Timiclassic Logo" className="w-10 h-10 rounded-full object-cover shadow-[0_0_15px_rgba(212,175,55,0.4)] border border-[#a67c1e]/30" />
             <div>
-              <h1 className="text-lg font-serif tracking-widest uppercase font-bold text-[#0d0d0c] drop-shadow-md">
+              <h1 className="text-base sm:text-lg font-serif tracking-widest uppercase font-bold text-[#0d0d0c] drop-shadow-md">
                 TIMICLASSIC
               </h1>
               <p className="text-[10px] tracking-[0.2em] uppercase text-[#a67c1e] font-semibold drop-shadow-md">
@@ -99,7 +99,7 @@ export default function AboutPage() {
           <p className="text-sm text-[#5c564a] leading-relaxed">
             We specialize in creating premium custom garments—ranging from structural bridal gowns that captivate the room, to vibrant, heritage-rich traditional outfits that celebrate identity and culture. Each piece is modeled and constructed to the wearer's unique dimensions, ensuring an absolute second-skin fit.
           </p>
-          <div className="grid grid-cols-3 gap-6 pt-4 border-t border-[#d1c9b8]/60">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-4 border-t border-[#d1c9b8]/60">
             <div>
               <div className="text-2xl font-serif text-[#a67c1e] font-bold">2018</div>
               <div className="text-[10px] uppercase text-[#5c564a] tracking-widest font-semibold mt-1">Established</div>
@@ -108,14 +108,14 @@ export default function AboutPage() {
               <div className="text-2xl font-serif text-[#a67c1e] font-bold">100%</div>
               <div className="text-[10px] uppercase text-[#5c564a] tracking-widest font-semibold mt-1">Bespoke Fits</div>
             </div>
-            <div>
+            <div className="col-span-2 sm:col-span-1">
               <div className="text-2xl font-serif text-[#a67c1e] font-bold">900+</div>
               <div className="text-[10px] uppercase text-[#5c564a] tracking-widest font-semibold mt-1">Garments Created</div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-4 mt-8 lg:mt-0">
           <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-[#d1c9b8] shadow-2xl">
             <img src="/dresses/couture-6.jpg" alt="Bridal Craftsmanship" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -123,7 +123,7 @@ export default function AboutPage() {
               <span className="text-[10px] tracking-widest uppercase text-[#a67c1e] font-bold">Bridal Couture</span>
             </div>
           </div>
-          <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-[#d1c9b8] shadow-2xl translate-y-8">
+          <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-[#d1c9b8] shadow-2xl sm:translate-y-8">
             <img src="/dresses/couture-7.jpg" alt="Heritage Attire" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             <div className="absolute bottom-4 left-4 right-4">
