@@ -246,7 +246,7 @@ export default function DashboardPage() {
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="luxury-card p-6 flex items-center justify-between">
+        <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 flex items-center justify-between">
           <div>
             <p className="text-[10px] uppercase tracking-widest text-[#8e8e88] font-semibold">Active Orders</p>
             <h3 className="text-3xl font-serif font-bold text-[#f5f5f0] mt-1">{metrics.activeOrders}</h3>
@@ -258,7 +258,7 @@ export default function DashboardPage() {
         </div>
 
         {!isStaff && (
-          <div className="luxury-card p-6 flex items-center justify-between">
+          <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 flex items-center justify-between">
             <div>
               <p className="text-[10px] uppercase tracking-widest text-[#8e8e88] font-semibold">Revenue This Month</p>
               <h3 className="text-3xl font-serif font-bold text-[#f5f5f0] mt-1">
@@ -274,7 +274,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <div className="luxury-card p-6 flex items-center justify-between">
+        <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 flex items-center justify-between">
           <div>
             <p className="text-[10px] uppercase tracking-widest text-[#8e8e88] font-semibold">Pending Tasks</p>
             <h3 className="text-3xl font-serif font-bold text-[#f5f5f0] mt-1">{metrics.tasksDue}</h3>
@@ -285,7 +285,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="luxury-card p-6 flex items-center justify-between">
+        <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 flex items-center justify-between">
           <div>
             <p className="text-[10px] uppercase tracking-widest text-[#8e8e88] font-semibold">Total Clients</p>
             <h3 className="text-3xl font-serif font-bold text-[#f5f5f0] mt-1">{metrics.clientCount}</h3>
@@ -301,7 +301,7 @@ export default function DashboardPage() {
       {!isStaff && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Revenue SVG Chart */}
-          <div className="luxury-card p-6 lg:col-span-2 space-y-6">
+          <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-sm uppercase tracking-widest font-semibold flex items-center gap-1 text-[#f5f5f0]">
               <TrendingUp className="w-4 h-4 text-[#d4af37]" /> Revenue Trend (Last 6 Months)
@@ -333,7 +333,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Popular Categories */}
-        <div className="luxury-card p-6 flex flex-col justify-between">
+        <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 flex flex-col justify-between">
           <div className="space-y-4">
             <h3 className="text-sm uppercase tracking-widest font-semibold text-[#f5f5f0]">
               Popular Garments
@@ -375,7 +375,7 @@ export default function DashboardPage() {
       {/* Recent Orders & Deadlines calendar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Orders List */}
-        <div className="luxury-card p-6 lg:col-span-2 space-y-4">
+        <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between border-b border-[#1f1b12]/50 pb-3">
             <h3 className="text-sm uppercase tracking-widest font-semibold text-[#f5f5f0]">
               Recent Custom Orders
@@ -417,7 +417,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Deadlines Calendar View */}
-        <div className="luxury-card p-6 space-y-4">
+        <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-6 space-y-4">
           <h3 className="text-sm uppercase tracking-widest font-semibold text-[#f5f5f0] flex items-center gap-1.5">
             <CalendarIcon className="w-4 h-4 text-[#d4af37]" /> Upcoming Deadlines
           </h3>
