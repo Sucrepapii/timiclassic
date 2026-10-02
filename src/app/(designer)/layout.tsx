@@ -17,7 +17,8 @@ import {
   Clock,
   Menu,
   X,
-  Shield
+  Shield,
+  Star
 } from 'lucide-react';
 import { useTimerStore } from '@/store/useStore';
 import toast from 'react-hot-toast';
@@ -71,6 +72,7 @@ export default function DesignerLayout({ children }: { children: React.ReactNode
     { name: 'Orders & Garments', href: '/orders', icon: Scissors },
     { name: 'Kanban Board', href: '/kanban', icon: Layers },
     { name: 'Communication Hub', href: '/communications', icon: Mail },
+    { name: 'Reviews', href: '/reviews', icon: Star },
     { name: 'Staff', href: '/staff', icon: Shield },
   ];
 

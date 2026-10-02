@@ -41,6 +41,7 @@ model Client {
   user           User            @relation(fields: [userId], references: [id])
   orders         Order[]
   communications Communication[]
+  reviews        Review[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
@@ -177,4 +178,15 @@ enum CommType {
 enum CommDirection {
   INBOUND
   OUTBOUND
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int      @default(5)
+  comment     String   @db.Text
+  isApproved  Boolean  @default(false)
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

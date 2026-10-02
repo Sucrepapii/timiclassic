@@ -16,8 +16,8 @@ import {
   FileText,
   Clock,
   Bell,
-  ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Star
 } from 'lucide-react';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/components/billing/InvoicePDF';
@@ -108,6 +108,11 @@ export default function ClientPortalPage() {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  // Review state
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   const fetchProfile = async () => {
     try {
       const res = await fetch('/api/portal/profile');
@@ -155,6 +160,35 @@ export default function ClientPortalPage() {
       console.error(err);
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewComment.trim()) return;
+    setSubmittingReview(true);
+
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rating: reviewRating,
+          comment: reviewComment,
+        }),
+      });
+
+      if (res.ok) {
+        setReviewComment('');
+        setReviewRating(5);
+        toast.success('Thank you! Your review has been submitted.');
+      } else {
+        toast.error('Failed to submit review.');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -419,6 +453,44 @@ export default function ClientPortalPage() {
               >
                 <Send className="w-4 h-4 text-black" />
                 {sending ? 'Sending...' : 'Send Message'}
+              </button>
+            </form>
+          </div>
+
+          {/* Leave a Review Box */}
+          <div className="luxury-card p-6 space-y-4">
+            <h3 className="text-xs uppercase tracking-widest font-bold text-[#d4af37] border-b border-[#1f1b12]/50 pb-2 flex items-center gap-1.5">
+              <Star className="w-4 h-4" /> Leave a Review
+            </h3>
+            <p className="text-[10px] text-[#8e8e88] uppercase tracking-widest">
+              Tell us about your Timiclassic experience!
+            </p>
+            <form onSubmit={handleReviewSubmit} className="space-y-4 text-xs">
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    onClick={() => setReviewRating(star)}
+                    className={`w-6 h-6 cursor-pointer transition-colors ${
+                      star <= reviewRating ? 'fill-[#d4af37] text-[#d4af37]' : 'text-[#8e8e88]'
+                    }`}
+                  />
+                ))}
+              </div>
+              <textarea
+                rows={3}
+                required
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                className="w-full luxury-input resize-none"
+                placeholder="How did you love your custom piece?..."
+              />
+              <button
+                type="submit"
+                disabled={submittingReview}
+                className="luxury-btn-primary flex items-center justify-center gap-1.5 uppercase tracking-widest px-6 py-2.5 disabled:opacity-50 cursor-pointer"
+              >
+                {submittingReview ? 'Submitting...' : 'Submit Review'}
               </button>
             </form>
           </div>

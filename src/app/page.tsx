@@ -2,11 +2,21 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Scissors, Crown, Sparkles, ArrowRight, Menu, X } from 'lucide-react';
+import { Scissors, Crown, Sparkles, ArrowRight, Menu, X, Star } from 'lucide-react';
 import HeroSlider from '@/components/HeroSlider';
 
 export default function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    fetch('/api/reviews?approvedOnly=true')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setReviews(data);
+      })
+      .catch((err) => console.error('Failed to load reviews', err));
+  }, []);
 
   return (
     <main className="min-h-screen bg-[#f7f4eb] text-[#0d0d0c] font-sans flex flex-col">
@@ -153,6 +163,42 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Testimonials Section */}
+      {reviews.length > 0 && (
+        <section className="w-full bg-[#fdfcf7] py-24 border-y border-[#d1c9b8]/40">
+          <div className="max-w-5xl mx-auto px-8 text-center space-y-12">
+            <div className="space-y-4">
+              <h2 className="text-3xl md:text-4xl font-serif tracking-wide text-[#0d0d0c]">
+                Client <span className="text-[#a67c1e]">Experiences</span>
+              </h2>
+              <p className="text-xs uppercase tracking-widest font-semibold text-[#5c564a]">
+                What our clients say about Timiclassic
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {reviews.slice(0, 3).map((review) => (
+                <div key={review.id} className="bg-[#f7f4eb] border border-[#d1c9b8]/60 p-8 rounded-2xl shadow-lg flex flex-col items-center text-center space-y-4 hover:scale-[1.02] transition-transform">
+                  <div className="flex gap-1 text-[#a67c1e]">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'opacity-30'}`} />
+                    ))}
+                  </div>
+                  <p className="text-sm text-[#5c564a] italic leading-relaxed">
+                    "{review.comment}"
+                  </p>
+                  <div className="pt-4 border-t border-[#d1c9b8]/30 w-full">
+                    <p className="text-[10px] uppercase tracking-widest font-bold text-[#0d0d0c]">
+                      {review.client.firstName} {review.client.lastName}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Footer Overlay */}
       <footer className="w-full border-t border-[#d1c9b8]/40 py-8 text-center flex flex-col items-center gap-2 text-[10px] text-[#5c564a] uppercase tracking-wider font-semibold bg-[#f7f4eb]">
