@@ -95,8 +95,12 @@ export async function POST(req: Request) {
       const existingClient = await prisma.client.findUnique({
         where: { email: emailKey },
       });
-      if (existingClient) {
-        return NextResponse.json({ error: 'A client with this email already exists' }, { status: 400 });
+      const existingUser = await prisma.user.findUnique({
+        where: { email: emailKey },
+      });
+      
+      if (existingClient || existingUser) {
+        return NextResponse.json({ error: 'This email is already in use by another account' }, { status: 400 });
       }
     }
 

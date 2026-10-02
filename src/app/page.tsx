@@ -10,7 +10,7 @@ export default function LandingPage() {
   const [reviews, setReviews] = useState<any[]>([]);
 
   React.useEffect(() => {
-    fetch('/api/reviews?approvedOnly=true')
+    fetch('/api/reviews?approvedOnly=true', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setReviews(data);

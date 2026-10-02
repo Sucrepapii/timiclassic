@@ -19,7 +19,7 @@ export default function StaffManagementPage() {
   const [editingStaffId, setEditingStaffId] = useState<string | null>(null);
   const [staffForm, setStaffForm] = useState({ name: '', email: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<{ id: string, isActive: boolean } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ id: string, type: 'DEACTIVATE' | 'REACTIVATE' | 'DELETE' } | null>(null);
 
   useEffect(() => {
     if (!isAdmin && session) {
@@ -88,20 +88,34 @@ export default function StaffManagementPage() {
 
   const executeToggleActive = async () => {
     if (!confirmAction) return;
-    const { id: staffId, isActive: currentStatus } = confirmAction;
+    const { id: staffId, type } = confirmAction;
     setConfirmAction(null);
 
     try {
-      const res = await fetch(`/api/staff/${staffId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: !currentStatus }),
-      });
-      if (res.ok) {
-        toast.success(`Staff member ${currentStatus ? 'deactivated' : 'reactivated'}`);
-        fetchStaffList();
+      if (type === 'DELETE') {
+        const res = await fetch(`/api/staff/${staffId}?hard=true`, {
+          method: 'DELETE',
+        });
+        if (res.ok) {
+          toast.success('Staff member permanently deleted');
+          fetchStaffList();
+        } else {
+          const err = await res.json();
+          toast.error(err.error || 'Failed to delete staff member');
+        }
       } else {
-        toast.error('Failed to change active status');
+        const isActive = type === 'REACTIVATE';
+        const res = await fetch(`/api/staff/${staffId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isActive }),
+        });
+        if (res.ok) {
+          toast.success(`Staff member ${!isActive ? 'deactivated' : 'reactivated'}`);
+          fetchStaffList();
+        } else {
+          toast.error('Failed to change active status');
+        }
       }
     } catch (err) {
       console.error(err);
@@ -160,8 +174,11 @@ export default function StaffManagementPage() {
                       <button onClick={() => openEditModal(staff)} className="text-[#8e8e88] hover:text-[#d4af37] transition-colors cursor-pointer" title="Edit">
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => setConfirmAction({ id: staff.id, isActive: staff.isActive })} className={`${staff.isActive ? 'text-[#8e8e88] hover:text-red-400' : 'text-[#8e8e88] hover:text-emerald-400'} transition-colors cursor-pointer`} title={staff.isActive ? 'Deactivate' : 'Reactivate'}>
-                        {staff.isActive ? <Trash2 className="w-4 h-4" /> : <PowerOff className="w-4 h-4" />}
+                      <button onClick={() => setConfirmAction({ id: staff.id, type: staff.isActive ? 'DEACTIVATE' : 'REACTIVATE' })} className={`${staff.isActive ? 'text-[#8e8e88] hover:text-amber-400' : 'text-[#8e8e88] hover:text-emerald-400'} transition-colors cursor-pointer`} title={staff.isActive ? 'Deactivate' : 'Reactivate'}>
+                        <PowerOff className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => setConfirmAction({ id: staff.id, type: 'DELETE' })} className="text-[#8e8e88] hover:text-red-400 transition-colors cursor-pointer" title="Permanently Delete">
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -207,10 +224,12 @@ export default function StaffManagementPage() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="bg-[#111] border border-[#1f1b12] rounded-xl p-8 max-w-sm w-full shadow-2xl relative text-center">
             <h3 className="text-lg font-serif text-[#f5f5f0] mb-2 uppercase tracking-widest">
-              {confirmAction.isActive ? 'Deactivate Staff?' : 'Reactivate Staff?'}
+              {confirmAction.type === 'DELETE' ? 'Permanently Delete Staff?' : confirmAction.type === 'DEACTIVATE' ? 'Deactivate Staff?' : 'Reactivate Staff?'}
             </h3>
             <p className="text-xs text-[#8e8e88] mb-8">
-              {confirmAction.isActive 
+              {confirmAction.type === 'DELETE'
+                ? 'This action is irreversible. It will completely delete their account if they have no tied records.'
+                : confirmAction.type === 'DEACTIVATE'
                 ? 'They will no longer be able to log in to the Timiclassic Command Center. Their history will remain intact.'
                 : 'They will instantly regain access to log in with their existing credentials.'}
             </p>
@@ -218,8 +237,8 @@ export default function StaffManagementPage() {
               <button onClick={() => setConfirmAction(null)} className="flex-1 px-4 py-2 text-xs uppercase tracking-widest text-[#8e8e88] hover:text-[#f5f5f0] border border-[#1f1b12] rounded-lg hover:bg-[#161616] transition-colors cursor-pointer">
                 Cancel
               </button>
-              <button onClick={executeToggleActive} className={`flex-1 px-4 py-2 text-xs uppercase tracking-widest font-bold rounded-lg transition-colors cursor-pointer ${confirmAction.isActive ? 'bg-red-950/60 text-red-400 border border-red-900/50 hover:bg-red-900/80' : 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/50 hover:bg-emerald-900/80'}`}>
-                {confirmAction.isActive ? 'Deactivate' : 'Reactivate'}
+              <button onClick={executeToggleActive} className={`flex-1 px-4 py-2 text-xs uppercase tracking-widest font-bold rounded-lg transition-colors cursor-pointer ${confirmAction.type === 'REACTIVATE' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/50 hover:bg-emerald-900/80' : 'bg-red-950/60 text-red-400 border border-red-900/50 hover:bg-red-900/80'}`}>
+                {confirmAction.type === 'DELETE' ? 'Delete' : confirmAction.type === 'DEACTIVATE' ? 'Deactivate' : 'Reactivate'}
               </button>
             </div>
           </div>

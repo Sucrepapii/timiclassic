@@ -58,6 +58,23 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const hardDelete = searchParams.get('hard') === 'true';
+
+    if (hardDelete) {
+      try {
+        await prisma.user.delete({
+          where: { id: params.id },
+        });
+        return NextResponse.json({ success: true, message: 'Staff member permanently deleted.' });
+      } catch (err: any) {
+        if (err.code === 'P2003') {
+          return NextResponse.json({ error: 'Cannot permanently delete this staff member because they have associated clients or orders. Please deactivate them instead.' }, { status: 400 });
+        }
+        throw err;
+      }
+    }
+
     // Soft delete by setting isActive to false
     await prisma.user.update({
       where: { id: params.id },
