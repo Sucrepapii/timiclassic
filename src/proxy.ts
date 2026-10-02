@@ -38,7 +38,11 @@ export async function proxy(req: NextRequest) {
     }
     
     // Enforce temporary password change
-    if (token.needsPasswordChange && pathname !== '/portal/change-password') {
+    if (
+      token.needsPasswordChange && 
+      pathname !== '/portal/change-password' && 
+      !pathname.startsWith('/api/portal/change-password')
+    ) {
       return NextResponse.redirect(new URL('/portal/change-password', req.url));
     }
     
@@ -63,7 +67,12 @@ export async function proxy(req: NextRequest) {
     }
     
     // Enforce temporary password change for Staff
-    if (token.needsPasswordChange && pathname !== '/change-password') {
+    if (
+      token.needsPasswordChange && 
+      pathname !== '/change-password' && 
+      !pathname.startsWith('/api/change-password') &&
+      !pathname.startsWith('/api/portal/change-password')
+    ) {
       return NextResponse.redirect(new URL('/change-password', req.url));
     }
     if (token.role === 'CLIENT') {
