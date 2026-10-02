@@ -3,7 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const params = await context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user || (session.user as any).role !== 'ADMIN') {
@@ -24,7 +28,11 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const params = await context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user || (session.user as any).role !== 'ADMIN') {

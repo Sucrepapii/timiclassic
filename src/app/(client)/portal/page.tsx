@@ -16,6 +16,7 @@ import {
   FileText,
   Clock,
   Bell,
+  ChevronDown,
   ChevronUp,
   Star
 } from 'lucide-react';
