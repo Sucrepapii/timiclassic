@@ -8,6 +8,7 @@ import HeroSlider from '@/components/HeroSlider';
 export default function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewIndex, setReviewIndex] = useState(0);
 
   React.useEffect(() => {
     fetch('/api/reviews?approvedOnly=true', { cache: 'no-store' })
@@ -17,6 +18,23 @@ export default function LandingPage() {
       })
       .catch((err) => console.error('Failed to load reviews', err));
   }, []);
+
+  React.useEffect(() => {
+    if (reviews.length <= 3) return;
+    const interval = setInterval(() => {
+      setReviewIndex((prev) => (prev + 1) % reviews.length);
+    }, 5000); // rotate every 5 seconds
+    return () => clearInterval(interval);
+  }, [reviews.length]);
+
+  const getVisibleReviews = () => {
+    if (reviews.length <= 3) return reviews;
+    const visible = [];
+    for (let i = 0; i < 3; i++) {
+      visible.push(reviews[(reviewIndex + i) % reviews.length]);
+    }
+    return visible;
+  };
 
   return (
     <main className="min-h-screen bg-[#f7f4eb] text-[#0d0d0c] font-sans flex flex-col">
@@ -177,9 +195,9 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {reviews.slice(0, 3).map((review) => (
-                <div key={review.id} className="bg-[#f7f4eb] border border-[#d1c9b8]/60 p-8 rounded-2xl shadow-lg flex flex-col items-center text-center space-y-4 hover:scale-[1.02] transition-transform">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 transition-all duration-500 ease-in-out">
+              {getVisibleReviews().map((review: any, idx: number) => (
+                <div key={`${review.id}-${idx}`} className="bg-[#f7f4eb] border border-[#d1c9b8]/60 p-8 rounded-2xl shadow-lg flex flex-col items-center text-center space-y-4 hover:scale-[1.02] transition-transform animate-in fade-in zoom-in duration-500">
                   <div className="flex gap-1 text-[#a67c1e]">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'opacity-30'}`} />
@@ -188,7 +206,7 @@ export default function LandingPage() {
                   <p className="text-sm text-[#5c564a] italic leading-relaxed">
                     "{review.comment}"
                   </p>
-                  <div className="pt-4 border-t border-[#d1c9b8]/30 w-full">
+                  <div className="pt-4 border-t border-[#d1c9b8]/30 w-full mt-auto">
                     <p className="text-[10px] uppercase tracking-widest font-bold text-[#0d0d0c]">
                       {review.client.firstName} {review.client.lastName}
                     </p>
