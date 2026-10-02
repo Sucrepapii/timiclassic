@@ -81,7 +81,8 @@ export async function proxy(req: NextRequest) {
           pathname.startsWith('/api/portal') ||
           pathname.startsWith('/api/upload') ||
           pathname.startsWith('/api/communications') ||
-          pathname.startsWith(`/api/clients/${token.id}`)
+          pathname.startsWith(`/api/clients/${token.id}`) ||
+          pathname.startsWith('/api/reviews')
         ) {
           return NextResponse.next();
         }
