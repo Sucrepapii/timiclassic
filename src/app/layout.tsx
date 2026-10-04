@@ -27,6 +27,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/logo.jpg",
   },
+  verification: {
+    google: "kJDD1RI1Nx8VzRimYXxW0TFxG1QqSz5SyUdh4h3DsbQ",
+  },
 };
 
 export const viewport = {
