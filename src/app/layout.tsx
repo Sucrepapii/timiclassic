@@ -22,7 +22,22 @@ export const metadata: Metadata = {
     template: "%s | Timiclassic",
   },
   description: "Experience unparalleled bespoke fashion and couture at Timiclassic. We craft custom-tailored garments with meticulous attention to detail and traditional craftsmanship.",
-  keywords: ["bespoke fashion", "custom tailoring", "couture designer", "luxury fashion", "Timiclassic", "custom suits", "custom dresses", "fashion designer"],
+  keywords: [
+    "bespoke fashion", 
+    "custom tailoring", 
+    "couture designer", 
+    "luxury fashion", 
+    "Timiclassic", 
+    "custom suits", 
+    "custom dresses", 
+    "fashion designer",
+    "fashion designer in Lagos",
+    "fashion designer in Yaba",
+    "fashion designer in Onike",
+    "tailor in Lagos",
+    "tailor in Yaba",
+    "tailor in Onike"
+  ],
   authors: [{ name: "Timiclassic" }],
   creator: "Timiclassic",
   openGraph: {
