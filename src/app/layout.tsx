@@ -17,8 +17,27 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Timiclassic Fashion Designer - Fashion Command Center",
-  description: "Bespoke production, client measurements, task timers, and order workflows for Timiclassic.",
+  title: {
+    default: "Timiclassic | Bespoke Fashion Designer & Couture",
+    template: "%s | Timiclassic",
+  },
+  description: "Experience unparalleled bespoke fashion and couture at Timiclassic. We craft custom-tailored garments with meticulous attention to detail and traditional craftsmanship.",
+  keywords: ["bespoke fashion", "custom tailoring", "couture designer", "luxury fashion", "Timiclassic", "custom suits", "custom dresses", "fashion designer"],
+  authors: [{ name: "Timiclassic" }],
+  creator: "Timiclassic",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://www.timiclassic.com",
+    title: "Timiclassic | Bespoke Fashion Designer & Couture",
+    description: "Experience unparalleled bespoke fashion and couture at Timiclassic. We craft custom-tailored garments with meticulous attention to detail and traditional craftsmanship.",
+    siteName: "Timiclassic",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Timiclassic | Bespoke Fashion Designer & Couture",
+    description: "Experience unparalleled bespoke fashion and couture at Timiclassic.",
+  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
